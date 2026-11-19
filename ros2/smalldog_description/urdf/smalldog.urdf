@@ -6,9 +6,9 @@
   <material name="servo"><color rgba="0.12 0.12 0.14 1"/></material>
   <link name="base_link">
     <inertial>
-      <origin xyz="0.010018 -0.000020 0.027242" rpy="0 0 0"/>
-      <mass value="1.61533"/>
-      <inertia ixx="0.00395508" ixy="0.00000471" ixz="-0.00112218" iyy="0.00870624" iyz="-0.00000087" izz="0.00742800"/>
+      <origin xyz="-0.004438 -0.000024 0.012237" rpy="0 0 0"/>
+      <mass value="1.30867"/>
+      <inertia ixx="0.00209226" ixy="0.00000516" ixz="0.00040356" iyy="0.00471066" iyz="-0.00000039" izz="0.00503530"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -322,11 +322,6 @@
     <axis xyz="0 1 0"/>
     <limit lower="-1.9199" upper="1.9199" effort="3.2" velocity="3.86"/>
   </joint>
-  <link name="lidar_link"/>
-  <joint name="lidar_link_joint" type="fixed">
-    <parent link="base_link"/><child link="lidar_link"/>
-    <origin xyz="0.1075 0 0.095" rpy="0 1.5708 0"/>
-  </joint>
   <link name="camera_link"/>
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/><child link="camera_link"/>
@@ -336,10 +331,5 @@
   <joint name="camera_optical_joint" type="fixed">
     <parent link="camera_link"/><child link="camera_optical_frame"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
-  </joint>
-  <link name="gps_link"/>
-  <joint name="gps_joint" type="fixed">
-    <parent link="base_link"/><child link="gps_link"/>
-    <origin xyz="-0.05200 0.00000 0.10420" rpy="0 0 0"/>
   </joint>
 </robot>

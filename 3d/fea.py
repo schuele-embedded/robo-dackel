@@ -35,8 +35,6 @@ BMS_KG         = md.BMS_KG        # split out of ELECTRONICS_KG when the BMS mov
                                   # the battery module - it is still 55 g of robot, and
                                   # the ground load cases below scale with the total
 ELECTRONICS_KG = md.ELECTRONICS_KG
-LIDAR_KG       = md.LIDAR_KG
-GPS_KG         = md.GPS_KG
 CAMERA_KG      = md.CAMERA_KG
 IMU_KG         = md.IMU_KG
 BUCK_KG        = md.BUCK_KG       # out of ELECTRONICS_KG's allowance; total unchanged
@@ -47,20 +45,18 @@ NOT_CARRIED = ("servo_gauge",)
 
 def robot_mass():
     """mini_dog's own printed-mass estimate plus everything the robot carries.  The
-    ground load cases scale with this, so anything bolted on belongs here - the LiDAR is
-    230 g on a 2 kg robot and leaving it out made every ground case optimistic.
+    ground load cases scale with this, so anything bolted on belongs here.
 
     The carried list is the same one mini_dog.main() prints, and it is written out term by
     term rather than summed elsewhere for the reason CLAUDE.md's "masses live once" note
-    gives: this used to stop at LIDAR_KG, so the GPS mast, the camera and the IMU (40 g
-    between them) were absent and every ground case ran 1.3 % light."""
+    gives: a payload missing from one list is a robot that weighs two different amounts."""
     if not md.PARTS:
         md.build()
     printed = sum(wp.val().Volume() / 1000.0 * md.part_rho(n) * qty
                   for n, (wp, qty, _) in md.PARTS.items()
                   if n not in NOT_CARRIED) / 1000.0
     return (printed + N_SERVO * SERVO_KG + BATTERY_KG + BMS_KG + ELECTRONICS_KG
-            + LIDAR_KG + GPS_KG + CAMERA_KG + IMU_KG + BUCK_KG)
+            + CAMERA_KG + IMU_KG + BUCK_KG)
 
 # E [MPa], nu, sigma in-plane [MPa], sigma inter-layer [MPa].  Print-realistic values for
 # ~5 walls / 40 % infill, i.e. already below the datasheet numbers for moulded material.

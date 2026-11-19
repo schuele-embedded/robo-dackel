@@ -478,13 +478,6 @@ DECK_SCREWS  = ((-DECK_END_X, 41.0, (0.0, -1.0, 0.0)),
 # The deck's two stiffening lips, and the relief every deck screw needs through them.  An
 # ISO 7380 head at |y| = 41 stands 0.8 mm proud of its counterbore and reaches into the
 # lip, so chassis_top notches DECK_LIP_NOTCH out of it at all eight screws.
-# AT THE REAR PAIR THAT NOTCH GOES FULL DEPTH and runs out to the deck's own rear end,
-# and the reason is gps_mount: its two feet ARE that pair of screws, and a GPS_PAD_R pad
-# centred at |y| = 41 reaches 45.8 into a lip whose inner face is at 43.  Shrinking the
-# pad instead is not an option - clipped at 42.8 it would leave 0.05 mm of wall outboard
-# of an M3 clearance hole, i.e. an open slot - so the lip is what gives way.  It costs
-# 17 x 3 x 6 mm a side, at the very end of a 126 mm run, and it takes the useless 5 mm
-# stub the old x +-6 notch left behind x = -58 with it.  Added 2026-09-11.
 DECK_LIP_W, DECK_LIP_H = 3.0, 6.0     # the lip: width inboard of the deck edge, height
 DECK_LIP_NOTCH = 2.0                  # ... head relief at a deck screw, down from the top
 DECK_LIP_CUT   = 6.0                  # ... and its half length along x
@@ -675,32 +668,26 @@ NODE_Z0   = -6.0                      # its foot on the lower seats' top edge
 # above it - nothing stands proud under the deck, where the battery module's lid is
 # 0.6 mm away.  The deck goes onto the tray with the case already on it.  What the bare board measured (8 under, 16 over) is in
 # ref/opi/README.md and no longer in the model: the case's outline is the keep-out.
-OPI_BOX      = (105.0, 70.5, 40.0)    # the case, over the standoffs: the keep-out
-                                      # gps_mount arches over, the box every exporter
-                                      # hangs ELECTRONICS_KG on, opi_clear()'s probe
+OPI_BOX      = (105.0, 70.5, 40.0)    # the case, over the standoffs: the box every
+                                      # exporter hangs ELECTRONICS_KG on
 OPI_PCB_L    = 89.1                   # the PCB, along x                     drawing
 OPI_CASE_PCB = 5.5                    # the PCB's -x edge inboard of the case's -x face:
                                       # a 2.5 mm wall and the 3 mm the connector row
                                       # stands proud of the PCB     **verify** - measure
                                       # case face to hole centre before the deck prints
-OPI_X        = -33.0                  # case centre, x.  Micro-SD end forward (+x): the
-                                      # front face at 19.5 is over the LiDAR bracket's
-                                      # base disc (z <= 35, under the case floor) and
-                                      # 1.15 mm short of its rear leg bosses, which rise
-                                      # to 43.  Every mm further back is a mm less deck
-                                      # under the rear standoffs, which end 1.7 mm
-                                      # inside the deck's end; the connector end hangs
-                                      # 22.5 mm past the rear wall, over the XT30.  The
-                                      # card slot faces the bracket: the case comes off
-                                      # to reach it.
+OPI_X        = -33.0                  # case centre, x.  Micro-SD end forward (+x).
+                                      # Every mm further back is a mm less deck under
+                                      # the rear standoffs, which end 1.7 mm inside the
+                                      # deck's end; the connector end hangs 22.5 mm past
+                                      # the rear wall, over the XT30.
 OPI_HOLES    = (58.0, 49.0)           # hole to hole                        drawing
 OPI_HOLE_EDGE = 7.6                   # the +x pair, in from the PCB's +x edge   drawing
 OPI_HOLE_DX  = (-OPI_BOX[0]/2 + OPI_CASE_PCB + OPI_PCB_L - OPI_HOLE_EDGE
                 - OPI_HOLES[0]/2)     # pattern centre, from OPI_X
-OPI_STAND_R, OPI_STAND_H = 4.8, 6.5   # standoff: a plain spacer boss round the bolt;
-                                      # h is the least that lifts the case floor over the
-                                      # LiDAR bracket's base disc (top at 35, so 6 + 0.5)
-                                      # - every mm here is a mm of GPS mast
+OPI_STAND_R, OPI_STAND_H = 4.8, 6.5   # standoff: a plain spacer boss round the bolt.
+                                      # 6.5 lifted the case floor over the LiDAR
+                                      # bracket's base disc; the bracket is gone, the
+                                      # height stays - it is what OPI_SEAT_D is cut for
 OPI_BOLT_L   = 11.0                   # M2.5 x 11 from under the deck - the bolts in hand
 OPI_ENGAGE   = 2.5                    # ... of which this much (1 D) threads into the
                                       # case's brass spacer; the Pi's own screw shares
@@ -773,284 +760,35 @@ IMU_WINDOW   = (-34.0, -12.0)         # the deck's cable window, x - the harness
 IMU_Z0       = BODY_Z1 + DECK_T + OPI_STAND_H + OPI_CASE_FLOOR + IMU_TAPE + IMU_BOARD[2]
                                       # the PCB's TOP face, at 40.4: taped to the plate.
                                       # The package is on it - imu_xyz() is this plane.
-# LiDAR bracket.  LIDAR_X is shared: chassis_top drills the bolt circle at it and
-# lidar_mount is built on it, and they used to be two independent literals.
-# LIDAR_BASE_R is set by the Orange Pi, not by the bracket: the disc's rear tangent is at
-# LIDAR_X - LIDAR_BASE_R = 16 on the deck and the PCB's front edge is at 15 (OPI_X).  At
-# the old 30.0 it shared 95 mm3 with the standoffs of the pattern before the board was
-# measured.  26.0 still covers the bolt circle with a 1.8 mm rim.
-#
-# TWO bolt circles, and they are deliberately different.  LIDAR_BC is ours: bracket down
-# onto the deck, on the same 45 deg rays as the four legs so every screw is under a post.
-# LIDAR_L2_* is the sensor's, measured off the L2 mechanical drawing in the Unitree
-# manual (Installation Dimensions, p.10) - 4 x M3 BLIND 6 mm deep on a @51 circle at
-# 22.5 deg + k*90, inside a @60 spigot on a @75 base.  Those M3s are cut in the L2's own
-# base, so this is the second joint on the robot - after the servo hubs - where a screw
-# threads into stock hardware instead of a nut_slot.  Nothing threads into plastic here
-# either: the bracket side is a clearance hole.
-#
-# The two circles cannot be merged.  @51 for the deck screws would need the base disc out
-# at r=30, which is exactly the Orange Pi standoff clash noted above; and turning our legs
-# to 22.5 deg would push the deck holes to x = 42 + 22.5*cos(22.5) = 62.8, through the
-# body's own front face at 63.  So the L2 screws live in the top flange alone, and the
-# flange grew to r=32 to carry them with a 4.8 mm rim outside the hole.
-#
-# WHERE THE SENSOR POINTS, AND WHY IT IS A BRACKET AT THE NOSE, NOT A PEDESTAL.
-# The L2 scans a hemisphere ABOVE its own base plane (NEGA buys 6 deg below it), and the
-# capture in ref/lidar/ shows how it fills that hemisphere: the beam sweeps meridians
-# through the axis, so the density per steradian goes as 1/sin(angle off the axis) - the
-# axis is ~30x denser than the rim.  The axis, then, has to point where the things that
-# stop a walking robot are: the horizon.  LIDAR_TILT = 90 puts it there - the base plane
-# vertical at the chassis front face, the cone reaching 6 deg behind that plane, so the
-# ground is seen from the leading foot outwards and a 0.3 m obstacle at 1 m gets ~450
-# returns a frame (tools/lidar_tilt.py; at the old 45 deg tilted seat it got 54, the
-# dense axis pointed at the sky and 84 % of a frame returned nothing).
-#
-# LIDAR_SEAT_Z IS SET BY THE CAMERA, not by the sensor.  The L2 hangs LIDAR_L2_BOX[2]
-# forward of its seat, over the camera's lens, and the camera's job is a face at 2.2..4 m
-# - +19..+32 deg above its axis.  The box's lower front edge has to stay above the top of
-# the camera's frame: from the pupil at CAM_OPT up a 6 deg axis with a 52 deg vertical
-# FOV, that edge at x = 128 must clear z ~57, so the axis sits at 95.  camera_clear()
-# charges the real envelope against the real frame every build.  It puts the top of the
-# L2 at z 132 - exactly where the tilted seat had it - and its mass 30 mm further forward.
-#
-# LIDAR_X is the DECK INTERFACE and is NOT a free choice: the base plate's @45 bolt circle
-# has to clear the Orange Pi standoffs at (24, +-27) behind it (LIDAR_X >= 38.8) and land
-# on a deck that ends at 63 (LIDAR_X <= 44.1).  The seat is at the chassis front face,
-# LIDAR_SEAT_X, and the stem between the two carries the sensor's moment back to the
-# four deck bolts.
-LIDAR_X      = 42.0                   # base plate centre / deck bolt circle, on the deck
-LIDAR_TILT   = 90.0                   # axis forward.  See above.
-LIDAR_SEAT_X = BODY_L/2               # the seat plane: the chassis front face, 63
-LIDAR_SEAT_Z = 95.0                   # the axis height.  Set by the camera, see above.
-LIDAR_BC, LIDAR_N          = 45.0, 4
-LIDAR_L2_BC, LIDAR_L2_ANG  = 51.0, 22.5   # measured: Unitree L2 base, 4 x M3 v6
-LIDAR_L2_THREAD = 6.0                     # ... usable thread depth in the L2
-LIDAR_L2_BOX = (75.0, 75.0, 65.0)         # ... and its envelope, same drawing: across,
-                                          # across, and along its own axis
-LIDAR_OPT    = 44.5                       # ... and the 44.50 on its side view: the height
-                                          # its scan core sits at, up its own axis from
-                                          # the seat.  Every FOV number here is measured
-                                          # from that point, not from the seat.
-LIDAR_BASE_R, LIDAR_BASE_T = 26.0, 6.0
-# ... and the plate is FLAT-CUT in front, at LIDAR_BASE_FLAT.  A @52 disc centred on
-# LIDAR_X reaches x = 68, which put 6 mm of plate directly over the only slot the camera
-# fits in - see the camera block.  Nothing needs that material: the deck bolts are on a
-# @45 circle whose front pair sits at x = 57.9, and the four bosses at r = 21 reach
-# x = 63.35, so a flat at 63.5 leaves the bosses untouched and still keeps 5.6 mm of rim
-# in front of the bolt.  The stem stands on this plate and its front face IS the chassis
-# front face, so nothing of the bracket reaches past 63.5 either.
-LIDAR_BASE_FLAT = 63.5
-LIDAR_TOP_R,  LIDAR_TOP_T  = 32.0, 7.0    # the seat disc: @64 carries the @51 circle with
-                                          # a 4.8 mm rim; 7 mm of seat + 5 mm of thread in
-                                          # the L2 is the M3 x 12
-LIDAR_SEAT_POCKET = 2.5                   # ... recessed from the back inside a rim of
-LIDAR_SEAT_RIM    = 4.0                   # this, except for a boss under each head
-LIDAR_SEAT_BOSS_R = 5.0                   # 4.6 cm3 for nothing the screws need
-LIDAR_STEM_T, LIDAR_STEM_W = 4.0, 48.0    # the stem under the seat, plate to disc.  48
-                                          # wide leaves the disc's flanks overhanging at
-                                          # 41 deg off vertical at worst - prints, and the
-                                          # 64 that would not overhang at all is 5 cm3
-LIDAR_RIB_T, LIDAR_RIB_Y   = 3.0, 16.5    # two ribs behind the stem, outboard faces at
-                                          # +-RIB_Y: between the L2's inner screw heads
-                                          # (|y| <= 12.6) and its outer ones (>= 20.8), so
-                                          # a driver reaches all four from behind
-LIDAR_RIB_X0, LIDAR_RIB_Z1 = 34.0, 100.0  # ... foot back to x 34 (OPI_BOX ends at 15),
-                                          # tip up the stem to z 100: 20 deg off vertical
-LIDAR_LEG_R,  LIDAR_LEG_D  = 21.0, 13.0   # the four bosses round the deck bolts ...
-LIDAR_LEG_H  = 14.0                       # ... just tall enough to roof the nut slot
-LIDAR_CORE_R = 11.0                   # cable core: through the seat on the axis, and
-                                      # straight down through the plate into the tray
-LIDAR_NUT_Z  = (8.0,)                 # nut-slot floor above the deck, for the M3 that
-                                      # comes up from under the deck.  There is no second
-                                      # nut: the L2 screw threads into the L2.
-# ... and that M3 is a FLAT head, countersunk into the deck's underside, for the reason
-# the Orange Pi's bolts are: the rear pair sit over the battery lid, 0.6 mm below the
-# deck, and a socket head there is 3 mm of steel the deck cannot be lowered onto the tray
-# past.  ISO 10642 M3: @6.0 head, 90 deg, in a @6.2 bore; its face LIDAR_SEAT_D below
-# flush, the cone 1.4 tall above that, 2.3 mm of deck left under the bracket's plate -
-# which is what carries the clamp, the deck is a spacer here.  Same M3 x 16: a flat head's
-# length includes the head, so the nut still lands at LIDAR_NUT_Z with 5 mm to spare.
-LIDAR_HEAD_R = 3.1                    # ISO 10642 M3 flat head: @6.0 max, in a @6.2 bore
-LIDAR_SEAT_D = 0.3                    # the head's flat face, up from the deck's underside
-LIDAR_SEAT_H = LIDAR_HEAD_R - M3_CLR  # ... the 90 deg seat's height, 1.4
+# The camera mount's two deck bolts.  They were the LiDAR bracket's front pair, shared
+# with it; the bracket is gone (no LiDAR, no GPS on this robot) and they are the mount's
+# own now: an M3 x 12 flat head from under the deck, through the mount's tab, into a nut
+# and washer on the tab's top.  Flat heads for the reason the Orange Pi's are - nothing
+# may stand proud under the deck.  Off the torque path: the tabs hold a 4 g board.
+# 9 mm in from the deck's end keeps the head's seat off the deck slot at BODY_L/2 - 5.
+CAM_BOLT     = (BODY_L/2 - 9.0, 16.0) # (x, |y|) on the deck
+CAM_BOLT_L   = 12.0                   # M3 x 12, cam_bolt_check()
+CAM_HEAD_R   = 3.1                    # ISO 10642 M3 flat head: @6.0 max, in a @6.2 bore
+CAM_SEAT_D   = 0.3                    # the head's flat face, up from the deck's underside
+CAM_SEAT_H   = CAM_HEAD_R - M3_CLR    # ... the 90 deg seat's height, 1.4
 
-# The L2 as a SENSOR rather than as a lump of mass.  Everything above describes where the
-# thing is bolted; these are what it sees, and they are here for the same reason the
-# masses are: lidar.py, export_sim.py and ../ros2/.../generate_model.py all model the scan
-# and none of them may keep its own copy of a number that belongs to the sensor.
-#
-# POINT RATE AND FRAME RATE ARE MEASURED.  They were catalogue figures - 21600 pts/s at
-# 10 Hz - and the real L2 does neither: 62341 points per second in 240 frames over 20.0 s,
-# i.e. 12.0 Hz and 5196 points per frame, on firmware 2.8.11.1.  That is 2.9x the point
-# rate the sim had been casting, and it was wrong in the direction that flatters the
-# model, so anything that read "the cloud is sparse" off this repo before 2026-09-05 read
-# it off a number nobody had checked.  Two independent captures 5 s and 20 s apart agree
-# to 2 parts in 62000, so this is the sensor's clock and not a sample.  Method:
-# ref/lidar/README.md; the capture is ref/lidar/l2_room.pcd.
-#
-# LIDAR_FRAME_HZ lives here rather than in lidar.py for the reason every other number in
-# this block does: it is the sensor's, both sim exporters write it into the model, and
-# lidar.py's own header is explicit that its file-local constants are the ones that are
-# *guesses*.  It stopped being a guess when the sensor arrived.
-#
-# The remaining two are still catalogue, and still **verify** in README.md: the range
-# window (the room the capture was taken in is 10 m across, which tests neither end) and
-# the range noise (which needs a flat wall at a known standoff, not a room).
-#
-# LIDAR_FOV is the "360 x 90" of the catalogue read as what it is - a cone of half-angle
-# 90 deg about the sensor's own axis, from that axis down to its base plane.  NEGA, the
-# factory default, buys 6 more degrees BELOW that plane and nothing else.  The capture
-# reaches 96.4 deg off-axis, so NEGA is confirmed as the envelope; FOV is left at 90 as
-# the base-plane figure it has always been.  lidar_fov_clear() has always measured against
-# 96; it just used to spell it inline.
-LIDAR_FOV, LIDAR_FOV_NEGA = 90.0, 96.0    # scan cone half-angle about the axis, deg
-LIDAR_RATE     = 62340.0              # points per second                     MEASURED
-LIDAR_FRAME_HZ = 12.0                 # clouds per second out of the sensor   MEASURED
-LIDAR_R_MIN, LIDAR_R_MAX = 50.0, 30000.0  # mm, usable range window          **verify**
-LIDAR_SIGMA  = 20.0                   # mm, 1-sigma range noise (+-2 cm spec) **verify**
-# WHY THERE IS NO LIDAR GUARD.
-# There was one, and it is gone on purpose - `git log` has the shape if it is ever wanted
-# back.  Two things killed it and the second is the honest one:
-#
-#   1. You cannot cage this sensor anyway.  Its FOV is a hemisphere referenced to its own
-#      base plane, so EVERY bar above that plane is a permanent blind stripe, and the
-#      manual is blunt: "do not block its FOV.  Even installing a transparent glass plate
-#      on the optical window will affect the performance".  The only free space is the
-#      wedge UNDERNEATH the cone, so the guard could only ever be a low bow ahead of the
-#      nose - never a cage over it.
-#   2. That bow did not protect much.  hip_bracket already reaches x = 114.3, level with
-#      the L2's nose at 114.5, so the front legs take a flat wall at the same moment the
-#      sensor does; and the bow could not cover a bare horizontal edge at the sensor's own
-#      height - a table top, a shelf - because guarding that means a bar dead ahead, in
-#      the cone.  What it did cover was the case of something reaching below ~205 mm with
-#      clear air above it.
-#
-# What removing it bought: 11.1 g off the very nose, which on this robot is worth more
-# than it sounds (see README, "Terrain feedback" - 11 g there moved the flat trot 778 ->
-# 547 mm), a clear lower half of the camera frame, and two M3 x 12 back where the deck's
-# front screws used to need M3 x 24.  If it comes back it has to clear the camera, which
-# now occupies the slot its inboard arms used to fly through.
-
-
-# =====================================================================================
-# GPS - u-blox NEO-6M on the GY-NEO6MV2 carrier, with the 25 x 25 ACTIVE ceramic patch
-# it ships with (the patch carries its own LNA, biased over the coax by the module; there
-# is nothing mechanical to it beyond "it is 25 x 25 and it must see sky").
-#
-# WHERE IT CAN GO, WHICH IS ALMOST NOWHERE
-# A patch antenna is the same kind of sensor as the L2: it looks at a hemisphere ABOVE
-# itself and everything that stands over it is a permanent hole in its view.  So it wants
-# the highest flat spot on the robot, and this robot has none free:
-#
-#   * the deck's top face is the Orange Pi's case.  OPI_BOX spans x -85.5..19.5, |y| <= 35.25, z 35.5..75.5
-#     - which is the whole of the deck between its two stiffening lips,
-#   * ahead of the Pi is the LiDAR bracket (base plate r = 26 at x = 42) and then the L2,
-#   * the strips outboard of the Pi are 12 mm wide, against a 25 mm patch,
-#   * and anything that clears all of that by standing tall lands in the L2's own cone.
-#
-# The one thing that IS free is the volume above the Pi and behind the L2, and it is free
-# for a reason worth writing down: the L2's cone is referenced to its own base plane, and
-# that plane leans LIDAR_TILT forward, so "up and behind" is BELOW it.  At the mast's
-# worst vertex, z + (x - LIDAR_X)*tan45 = -9 against the 60 the seat sits at - 69 mm of
-# margin, where the deck lip in front has 4.  lidar_fov_clear() charges the real 96 deg
-# NEGA cone against it on every build, exactly as it does the camera.
-#
-# So: a trestle on the deck's REAR pair of boss screws, the trick the old lidar_guard
-# with the front pair - it takes no new holes anywhere, those two screws just grow from
-# M3x12 to M3x24 - arching over the Pi to a platform at GPS_SEAT_Z.  The receiver sits on
-# the platform and the patch sits on the receiver, which is how the module ships.
-#
-# THE KINK IN THE ARMS IS NOT STYLING.  Two constraints fix it and they pull opposite ways:
-#   * no run of an arm may lean more than 45 deg off vertical, or the part stops printing
-#     without support - the same rule that shapes lidar_mount,
-#   * and the arm has to be clear of OPI_BOX, whose top corner is at (|y| = 35.25, z = 75.5),
-#     before it gets inboard of it.  A straight arm from the pad cannot: at 45 deg its
-#     lower edge passes that corner 8 mm too low, whatever the platform's width.
-# So the arm rises out of its pad first and makes exactly one 45 deg run inboard, and
-# where it turns is derived, not chosen.  (The first run leans from the pads at |y| = 41
-# in to the knee's |y| - 1.25 mm over 34 of rise on the case, well inside the same 45 deg
-# print rule.  The knee is not taken out to 41 and a vertical run: that would buy 1.25 mm
-# of inboard reach at 1.25 mm of mast, for nothing.)  A rod leaning 45 deg carries its
-# lower edge GPS_ROD/sqrt(2) = 2.47 mm below and inboard of its axis, i.e. GPS_ROD*sqrt(2)
-# = 4.95 below the axis at a given |y|: the knee's z is that, plus 1 mm of air, above the
-# envelope's top, less the 45 deg drop from the knee's |y| to the envelope's - 76.9 on
-# the case, and GPS_KNEE is that formula, not the number, so the mast follows the box.
-# The knee's |y| follows it too: the near-vertical first run's inboard edge has to pass
-# the case's side, so GPS_KNEE_Y = W/2 + GPS_ROD + 1, never under 38.  It is checked and not asserted - gps_clear() intersects the real part with
-# the real envelope on every build, the way interference() does the body parts.
-# From the knee, 45 deg buys exactly as much inboard reach as it buys height, so the
-# platform's half-width and its height are ONE number: land the arms at |y| = 24 and the
-# underside has to be at knee + 14.  Widen the platform and the mast gets shorter and
-# heavier; narrow it and it gets taller and lighter.  24 is where it stops: past that the
-# platform is wider than the deck's own boss pair and the arms start leaning outward.
-#
-# What it costs the antenna, honestly: the L2 blocks the forward sky below ~27 deg
-# elevation and the Pi's connector row blocks a little more of it, so this is a receiver
-# with a mask over one azimuth sector, not a survey antenna.  Nothing about the robot can
-# fix that - the other sensor is bigger than this one and it was here first.  What the
-# height does buy is ~20 mm of separation from the Pi's case, which is the part that matters at
-# 1.575 GHz: a USB 3 stack under a patch antenna is a well documented way to lose a fix.
-# THE FEET ARE READ FROM DECK_SCREWS AND NOT TYPED BESIDE IT, and that is the whole fix
-# for a defect that shipped: this line was `GPS_X, GPS_Y = -52.0, 38.0`, and when the
-# battery module pushed all four deck pairs from |y| = 38 to 41 the mast stayed behind.
-# gps_mount then drilled its feet at (-52, +-38) and chassis_top drilled the deck at
-# (-52, +-41) - 3 mm apart, so the one M3 x 24 that is supposed to pass through both
-# parts could pass neither.  NO CHECK IN THIS FILE COULD SEE IT: the two parts share no
-# solid, so interference() reads clear, and a fastener that lines up is not a volume.
-# Reading the pair means the mast now follows the deck wherever it goes.  Fixed
-# 2026-09-11.
-GPS_X, GPS_Y = DECK_SCREWS[0][0], DECK_SCREWS[0][1]   # the deck's rear boss pair
-GPS_PAD_R, GPS_PAD_H = 4.8, 10.0      # r is 1 x D of wall round an M3 clearance hole,
-                                      # which is the whole job of the pad.  At |y| = 41
-                                      # it reaches 45.8 into the deck's stiffening lip
-                                      # (43 .. 46, z 29 .. 35) and it may not be shrunk
-                                      # to fit: clipped at 42.8 the wall outboard of the
-                                      # hole is 0.05 mm.  The lip gives way instead - see
-                                      # DECK_LIP_* - and the pad is unchanged.
-GPS_ROD      = 3.5                    # arm radius
-GPS_KNEE_Y   = max(38.0, OPI_BOX[1]/2 + GPS_ROD + 1.0)
-                                      # |y| the arms turn inboard at: the first run is
-                                      # near-vertical and its inboard edge has to clear
-                                      # the case too - 39.75 on the 70.5 case
-GPS_KNEE     = (GPS_KNEE_Y, BODY_Z1+DECK_T+OPI_STAND_H+OPI_BOX[2] + GPS_ROD*math.sqrt(2) + 1.0
-                            - (GPS_KNEE_Y - OPI_BOX[1]/2))   # ... and z: derived, see above
 # The 12 -> 5 V buck (XL4015, ref/power/README.md) rides on the Orange Pi's case top on
-# foam tape, under the GPS platform.  It is the only 17 mm of air the robot has: the rear
-# strip is 14.05 deep, the side strips 8.4, and under the case's rear overhang the rear
-# roll fork sweeps r <= 34.  Long axis on x, on the centreline: the mast arms are at
-# |y| >= GPS_KNEE_Y and the plate's underside is what bounds it in z.  buck_clear()
-# measures both, plus the overlap against the real gps_mount.  It is a MODULE like the
-# battery: 5 V set under load on the bench, CC pot to the top, both pots varnished, the
-# terminals wired, and only then taped down - nothing on it is adjusted in place.
+# foam tape.  It is the only free air the robot has: the rear strip is 14.05 deep, the
+# side strips 8.4, and under the case's rear overhang the rear roll fork sweeps r <= 34.
+# Long axis on x, on the centreline, nothing over it.  It is a MODULE like the battery:
+# 5 V set under load on the bench, CC pot to the top, both pots varnished, the terminals
+# wired, and only then taped down - nothing on it is adjusted in place.
 BUCK_BOX     = (51.3, 26.0, 15.6)     # PCB plan x height to the top of the coil, measured
 BUCK_TAPE    = 1.5                    # foam tape: the underside carries 1.5 mm of solder
                                       # and parts, so film tape would stand it on blobs
-BUCK_X, BUCK_Y = GPS_X, 0.0           # under the plate, the rear end of the case top: the
-                                      # front half stays open for the case's own airflow
+BUCK_X, BUCK_Y = OPI_X - 19.0, 0.0    # the rear end of the case top: the front half
+                                      # stays open for the case's own airflow
                                       # **verify** where this case vents
 BUCK_Z0      = BODY_Z1 + DECK_T + OPI_STAND_H + OPI_BOX[2]   # the case top, 75.5
-BUCK_AIR     = 1.0                    # to the plate's underside - the platform's
-                                      # height follows this, below
-# |y| where the arms meet the platform.  24 is the ceiling (see above); it comes in
-# when the buck under the plate needs the underside higher: from the knee each mm of
-# reach given up is a mm of height, so the plate's underside sits at knee + (knee_y -
-# land) and the buck's top plus BUCK_AIR is the floor for that.  23.1 on the 15.6 buck.
-GPS_LAND     = min(24.0, GPS_KNEE_Y - (BUCK_Z0 + BUCK_TAPE + BUCK_BOX[2] + BUCK_AIR
-                                       - GPS_KNEE[1]))
-GPS_PLATE    = (40.0, 52.0, 3.0)      # platform x, y, t
-GPS_SEAT_Z   = GPS_KNEE[1] + (GPS_KNEE[0]-GPS_LAND) + GPS_PLATE[2]   # derived - see above
-GPS_BOARD    = (36.0, 26.0, 1.6)      # GY-NEO6MV2 PCB                        **verify**
-GPS_ANT      = (25.0, 25.0, 8.0)      # its active ceramic patch              **verify**
-GPS_TIE      = TIE_SLOT               # cable-tie slot through the platform
-GPS_TIE_X    = 14.0                   # ... at +-this, i.e. outside the 25 mm patch
-GPS_PHASE    = 6.0                    # patch phase centre, up from the patch's base plane
-GPS_STACK    = (GPS_BOARD[0], GPS_BOARD[1], GPS_BOARD[2]+GPS_ANT[2]+2.5)   # mass envelope
 
 # Camera.  Weinan WN-L2101.K203L: a Sony IMX415 (1/2.8", 8 MP) behind a fixed-focus M12
-# lens, USB 2.0 UVC, digital mic on the board.  It is here to put a NAME on what the L2
-# already puts a SHAPE on: the lidar returns geometry and no identity, and recognising a
-# face is the one job on this robot that wants pixels instead of points.
+# lens, USB 2.0 UVC, digital mic on the board.  Recognising a face is the one job on
+# this robot that wants pixels, and it is the only exteroceptive sensor left.
 #
 # Everything but the pose is off the vendor's Product Dimensions drawing.  The module is a
 # 90 x 15 mm STRIP with the lens near one end - not the 38 x 38 square the same seller's
@@ -1068,10 +806,7 @@ CAM_TAIL   = -1.0                     # which way the 70.6 mm tail runs.  -1 = -
 #   floor    the hip-roll cradles.  roll_module is solid over |y| <= 14 from x = 63 out to
 #            x = 106.5 and its root gusset is solid over |y| <= 49 from x = 63 to 67.5,
 #            both topping out at CAM_LEDGE.  Nothing sits below that in front of the body.
-#   ceiling  the LiDAR bracket's base plate, z = 29..35, reaching x = 68.  It had to be
-#            flat-cut - see LIDAR_BASE_FLAT - because the slot under it was 13.6 mm and
-#            the module's board is 15.0.  Above the cut there is air to the L2's underside
-#            at z = 57.5 - and the L2 is placed by this camera's frame, see LIDAR_SEAT_Z.
+#   ceiling  open air.  (It was the LiDAR bracket's base plate until the bracket went.)
 #   back     the chassis front face at x = 63.
 #   front    the hip-roll fork's REAR ARM at x = ROLL_X + FORK_Y0 = 68.1.  That arm is a
 #            disc about the roll axis; over the roll ROM it sweeps everything within
@@ -1154,10 +889,6 @@ CAM_LENS_REL = 2.0                    # relief round the @14 holder, on radius: 
 #     goes OVER the board instead.  The channel's top rises CAM_CAP above the pocket's own
 #     ceiling from the lens relief to the board's near end, which is 10.4 mm of roof clear
 #     of the tabs' skirt patches, which now carry the same roof on the -y side too.
-# There is room above: the ceiling here is LIDAR_BASE_FLAT = 63.5, i.e. the base plate is
-# cut away in front of the mount's own back plane, and measured, a roof to z 33.9 shares
-# 0.0 mm3 with lidar_mount and leaves lidar_fov_clear at +22.6 deg outside the 96 deg
-# cone (it was +23.1).  Fixed 2026-09-11.
 CAM_CAP      = 1.2                    # roof over the board pocket at the near end: three
                                       # 0.4 mm perimeters, and it carries nothing but a
                                       # 4 g board that must not lift out of its slot
@@ -1179,13 +910,13 @@ TPU_MAT_RHO       = 1.22          # g/cm3 - TPU 95A filament
 # set the mass and the factor sits near 1; the single 0.55 that used to stand here was
 # wrong by 330 g of robot.  Re-measure after any wall-count, line-width or reprofiling
 # change - out/gcode/summary.json is the slicer side of this number.
-PRINT_FILL        = {"chassis_bottom": 0.93, "chassis_top": 0.80, "lidar_mount": 0.85,
+PRINT_FILL        = {"chassis_bottom": 0.93, "chassis_top": 0.80,
                      "hip_bracket_A":  0.95, "hip_bracket_B": 0.95,
                      "thigh_A":        0.97, "thigh_B":       0.97,
                      "shin_A":         0.92, "shin_B":        0.92,
                      "servo_gauge":    0.94, "foot":          0.45}   # foot: **verify** - an estimate for the
                                                              # 2-wall / 10 % print; slice and weigh
-# gps_mount, cradle_front, cradle_rear, battery_case, battery_lid, camera_mount and
+# cradle_front, cradle_rear, battery_case, battery_lid, camera_mount and
 # cell_holder are deliberately absent: none has been sliced
 # yet, so part_rho() gives them PRINT_FILL_MEAN.  Slice them and put the measured factor
 # in the table.  chassis_bottom's own 0.93 was measured on the part WITH the four cradles
@@ -1216,8 +947,6 @@ ELECTRONICS_KG    = 0.200 + 0.032 # the Orange Pi in its case, MEASURED: 82 g bo
                                   # it got a place of its own; the total did not move.
                                   # **verify**, weigh the loom once it exists.  (Was a
                                   # 195 g guess for the bare board and wiring.)
-LIDAR_KG          = 0.230         # Unitree L2 on its bracket - confirmed, L2 manual
-                                  # Parameter Specifications: 230 g, 75x75x65 mm, 12 V 10 W
 CAMERA_KG         = 0.012         # IMX415 module: PCB, M12 holder, lens, connector.
                                   # **verify** - vendor gives no mass; weigh one.  It
                                   # sits at the very nose, which is the worst place on
@@ -1227,10 +956,6 @@ IMU_KG            = 0.003         # BMI088 breakout, headerless, with its six wi
                                   # this is the least certain line in it.  It is also the
                                   # smallest mass here, and 3 g is enough to move the flat
                                   # trot: see CLAUDE.md step 6 before reading a distance.
-GPS_KG            = 0.025         # GY-NEO6MV2 + its 25x25 active patch + the lead.
-                                  # 22 g is the vendor figure for the pair - **verify**,
-                                  # like every other number on this module: it is a bazaar
-                                  # part, not a documented one.
 BUCK_KG           = 0.018         # XL4015 buck on the Pi's case top - vendor figure,
                                   # ref/power/README.md, **verify** on the scale.  Hangs
                                   # at buck_com(); it used to sit inside ELECTRONICS_KG
@@ -2191,7 +1916,7 @@ def batt_clear():
     return BODY_Z1 - BATT_Z1
 
 # =====================================================================================
-# PART: chassis_top / lidar_mount
+# PART: chassis_top
 # =====================================================================================
 def chassis_top():
     z0, z1 = BODY_Z1, BODY_Z1+DECK_T
@@ -2211,176 +1936,27 @@ def chassis_top():
             s = s.cut(cyl(M25_CLR, DECK_T+OPI_STAND_H+2, (p[0], p[1], z0-1)))
             s = s.cut(cyl(OPI_HEAD_R, OPI_SEAT_D+1, (p[0], p[1], z0-1)))
             s = s.cut(cone(OPI_HEAD_R, M25_CLR, OPI_SEAT_H, (p[0], p[1], z0+OPI_SEAT_D)))
-    # LiDAR bracket bolts: M3 clearance, and the flat head's seat sunk from the deck's
-    # UNDERSIDE (LIDAR_HEAD_R / LIDAR_SEAT_D) - the rear pair are over the battery lid, and
-    # a socket head there stopped the deck 2.4 mm short of the tray.
-    for i in range(LIDAR_N):
-        a = math.radians(360.0*i/LIDAR_N+45.0)
-        p = (LIDAR_X+LIDAR_BC/2*math.cos(a), LIDAR_BC/2*math.sin(a), z0)
-        s = s.cut(cyl(M3_CLR, 20, (p[0], p[1], z0-1)))
-        s = s.cut(cyl(LIDAR_HEAD_R, LIDAR_SEAT_D+1, (p[0], p[1], z0-1)))
-        s = s.cut(cone(LIDAR_HEAD_R, M3_CLR, LIDAR_SEAT_H, (p[0], p[1], z0+LIDAR_SEAT_D)))
-    s = s.cut(cyl(LIDAR_CORE_R, 20, (LIDAR_X, 0, z0-1)))   # the LiDAR cable, into the tray
+    # camera mount bolts: M3 clearance, and the flat head's seat sunk from the deck's
+    # UNDERSIDE (CAM_HEAD_R / CAM_SEAT_D), see CAM_BOLT.
+    for px, py in cam_tab_bolts():
+        s = s.cut(cyl(M3_CLR, 20, (px, py, z0-1)))
+        s = s.cut(cyl(CAM_HEAD_R, CAM_SEAT_D+1, (px, py, z0-1)))
+        s = s.cut(cone(CAM_HEAD_R, M3_CLR, CAM_SEAT_H, (px, py, z0+CAM_SEAT_D)))
     s = s.cut(bxc(IMU_WINDOW[0], IMU_WINDOW[1], -34, 34, z0-1, z1+1))
     s = s.cut(bxc(BODY_L/2-5, BODY_L/2-3, -26, 26, z0-1, z1+1))
     # No IMU standoffs: the board is inside the Orange Pi's case, on its plate (IMU_*).
     for y in (-BODY_W/2, BODY_W/2-DECK_LIP_W):               # stiffening lips
         s = s.union(bxc(-BODY_L/2, BODY_L/2, y, y+DECK_LIP_W, z1, z1+DECK_LIP_H))
     for x, ay, _ in DECK_SCREWS:              # ... notched at every screw: a socket head
-        foot = (x == GPS_X and ay == GPS_Y)   # at |y| = 41 stands 0.8 mm proud of its
-        dz = DECK_LIP_H if foot else DECK_LIP_NOTCH       # counterbore and reaches into
-        x0 = -BODY_L/2-1.0 if foot else x-DECK_LIP_CUT    # the lip.  It used to be the
-        for sy in (-1.0, 1.0):                            # mid pair only; all four sit at
-            y0 = sy*(BODY_W/2-DECK_LIP_W)                 # 41 now - and at the GPS mast's
-            s = s.cut(bxc(x0, x+DECK_LIP_CUT,             # own pair it goes FULL DEPTH,
-                          y0, y0+sy*DECK_LIP_W,           # out to the deck's rear end,
-                          z1, z1+dz))                     # for GPS_PAD_R.  See DECK_LIP_*.
-    return s
-
-def lidar_pose():
-    """The L2's own frame in robot coordinates: (seat point, unit axis).  The axis is the
-    centre of the sensor's up-hemisphere, so it is also the extrinsic every consumer wants.
-    export_sim.py and ../ros2/.../generate_model.py both read the sensor's position from
-    here; each of them used to carry its own 42.0 literal and its own guess at the height."""
-    t = math.radians(LIDAR_TILT)
-    return (LIDAR_SEAT_X, 0.0, LIDAR_SEAT_Z), (math.sin(t), 0.0, math.cos(t))
-
-def lidar_box_xyz():
-    """LIDAR_L2_BOX as axis-aligned extents in robot coordinates: the box is two `across`
-    and one `along the axis`, and the axis leans LIDAR_TILT.  Exact at 0 and 90 deg, an
-    over-estimate between - both exporters build the L2's inertia from this."""
-    t = math.radians(LIDAR_TILT)
-    a, _, h = LIDAR_L2_BOX
-    return (abs(h*math.sin(t)) + abs(a*math.cos(t)), a,
-            abs(h*math.cos(t)) + abs(a*math.sin(t)))
-
-def lidar_module():
-    """The L2 itself as a solid - its LIDAR_L2_BOX envelope on the seat, not a printed
-    part.  Here for the reason camera_module() is: interference(), the ROM scan and the
-    camera's view check have to see the thing bolted on, and none of them can see a
-    number in a table."""
-    (sx, sy, sz), n = lidar_pose()
-    a, b, h = LIDAR_L2_BOX
-    t = math.radians(LIDAR_TILT)
-    box = bxc(-a/2, a/2, -b/2, b/2, 0.0, h)
-    return mv(box, frame((sx, sy, sz), xdir=(math.cos(t), 0.0, -math.sin(t)), zdir=n))
-
-def lidar_com():
-    """Centroid of the L2 itself - half its own height up its own axis from the seat."""
-    (px, py, pz), (nx, ny, nz) = lidar_pose()
-    h = LIDAR_L2_BOX[2]/2.0
-    return (px+nx*h, py+ny*h, pz+nz*h)
-
-def rod(a, b, r):
-    """A cylinder from a to b — the GPS mast is all rods and there was no helper."""
-    d = tuple(q-p for p, q in zip(a, b))
-    L = math.sqrt(sum(v*v for v in d))
-    return cyl(r, L, a, axis=tuple(v/L for v in d))
-
-def lidar_fov_clear(wp, nega=True):
-    """Worst-case angle from the L2's axis over a solid's vertices, in degrees.
-
-    The sensor sees a cone of HALF-angle 90 deg about its axis - the "360 x 90" in the
-    catalogue is that hemisphere, axis to base plane - and 96 with NEGA, measured
-    from its optical centre.  A point occludes exactly when it falls inside that cone, so
-    a part is clear when its WORST vertex is still outside - and the returned number is
-    the margin readers actually want: how many degrees of slack a part has before it
-    starts eating the view the whole bracket exists to buy.
-    """
-    (sx, sy, sz), n = lidar_pose()
-    o = (sx+n[0]*LIDAR_OPT, sy+n[1]*LIDAR_OPT, sz+n[2]*LIDAR_OPT)
-    worst = 180.0
-    # tessellate, do not use Vertices(): a cylinder has vertices only on its end circles,
-    # so a rod laid across the rim would sail through this check on its seam points while
-    # its barrel sat inside the cone.
-    for v in wp.val().tessellate(0.3)[0]:
-        d = (v.x-o[0], v.y-o[1], v.z-o[2])
-        L = math.sqrt(sum(q*q for q in d))
-        if L < 1e-9:
-            return 0.0
-        c = sum(q*m for q, m in zip(d, n))/L
-        worst = min(worst, math.degrees(math.acos(max(-1.0, min(1.0, c)))))
-    return worst - (LIDAR_FOV_NEGA if nega else LIDAR_FOV)
-
-def lidar_mount():
-    """The L2's bracket: a base plate on the deck, a stem up the chassis front face, and
-    a vertical seat disc the sensor bolts to with its axis forward.  Why it points forward
-    is argued in the parameter block; here is what that does to the geometry.
-
-    The deck interface is the tilted seat's, untouched: the @45 bolt circle at LIDAR_X,
-    four M3 up from under the deck into nuts in slots in four short bosses, the cable core
-    through the plate, the flat at LIDAR_BASE_FLAT and the two pockets for the camera
-    mount's tabs.  The front bosses' nut slots open SIDEWAYS through the stem's flanks
-    (they used to open radially, which would now be through the seat face); the rear
-    pair still open radially outward, into air.
-
-    The stem is a LIDAR_STEM_T plate from the base plate up to the seat, its front face
-    on the chassis front face; the part prints base-down and the disc's flanks overhang
-    the stem at 41 deg off vertical at worst.  Two ribs behind it, outboard of the L2's screw heads so
-    a driver reaches every head from behind, carry the sensor's moment to the base plate.
-    The seat is a @64 x 7 disc standing on the stem's front, 4 x M3 clearance on the
-    L2's @51 circle at 22.5 deg, the screw heads on its back.  The cable core goes
-    through the seat on the axis; the tails turn down behind the stem between the ribs
-    and drop through the plate's core into the tray."""
-    t  = math.radians(LIDAR_TILT)
-    n  = (math.sin(t), 0.0, math.cos(t))
-    dn = tuple(-v for v in n)
-    seat = (LIDAR_SEAT_X, 0.0, LIDAR_SEAT_Z)
-    cx, z0 = LIDAR_X, BODY_Z1+DECK_T
-    x1 = LIDAR_SEAT_X
-    s = cyl(LIDAR_BASE_R, LIDAR_BASE_T, (cx, 0, z0))
-    s = s.cut(bxc(LIDAR_BASE_FLAT, cx+LIDAR_BASE_R+2.0, -LIDAR_BASE_R-2.0,
-                  LIDAR_BASE_R+2.0, z0-1.0, z0+LIDAR_BASE_T+0.5))   # room for the camera
-    for i in range(LIDAR_N):
-        a = math.radians(360.0*i/LIDAR_N+45.0)
-        px, py = cx+LIDAR_LEG_R*math.cos(a), LIDAR_LEG_R*math.sin(a)
-        s = s.union(cyl(LIDAR_LEG_D/2, LIDAR_LEG_H, (px, py, z0)))
-    # the stem, the ribs and the seat
-    s = s.union(bxc(x1-LIDAR_STEM_T, x1, -LIDAR_STEM_W/2, LIDAR_STEM_W/2, z0, LIDAR_SEAT_Z))
-    s = s.union(cyl(LIDAR_TOP_R, LIDAR_TOP_T, seat, axis=dn))
-    # the disc's back is recessed LIDAR_SEAT_POCKET deep inside its rim, leaving a boss
-    # under each screw head: the seat is 7 mm where the M3 x 12 needs it and 4.5 elsewhere
-    back = tuple(seat[k] + dn[k]*LIDAR_TOP_T for k in range(3))
-    s = s.cut(cyl(LIDAR_TOP_R-LIDAR_SEAT_RIM, LIDAR_SEAT_POCKET, back, axis=n))
-    ex = (math.cos(t), 0.0, -math.sin(t))                 # the seat plane's own x
-    holes = []
-    for i in range(LIDAR_N):                              # L2 -> seat, 22.5 deg, normal to it
-        a = math.radians(360.0*i/LIDAR_N+LIDAR_L2_ANG)
-        r = LIDAR_L2_BC/2
-        holes.append(tuple(seat[k] + r*math.cos(a)*ex[k] + r*math.sin(a)*(0.0, 1.0, 0.0)[k]
-                           for k in range(3)))
-        s = s.union(cyl(LIDAR_SEAT_BOSS_R, LIDAR_TOP_T, holes[-1], axis=dn))
-    for sy in (-1.0, 1.0):
-        # tri() draws in XY and extrudes along Z; stood up with local z -> -y, so the
-        # extrusion runs from -y1 to -y0 and the triangle is (x, z) as written
-        lo, hi = sorted((-sy*LIDAR_RIB_Y, -sy*(LIDAR_RIB_Y-LIDAR_RIB_T)))
-        rib = tri(((LIDAR_RIB_X0, z0), (x1-LIDAR_STEM_T+0.5, z0),
-                   (x1-LIDAR_STEM_T+0.5, LIDAR_RIB_Z1)), lo, hi)
-        s = s.union(mv(rib, frame((0, 0, 0), xdir=(1, 0, 0), zdir=(0, -1, 0))))
-    s = s.cut(cyl(LIDAR_CORE_R, 200, (cx, 0, z0-10)))            # down into the tray
-    s = s.cut(cyl(LIDAR_CORE_R, 40.0, seat, axis=dn))            # and through the seat
-    for i in range(LIDAR_N):                              # bracket -> deck, 45 deg
-        a = math.radians(360.0*i/LIDAR_N+45.0)
-        px, py = cx+LIDAR_BC/2*math.cos(a), LIDAR_BC/2*math.sin(a)
-        s = s.cut(cyl(M3_CLR, 20.0, (px, py, z0-1)))
-        if px > cx:
-            # the camera mount's tab sits under this bolt, in a pocket in the plate's
-            # underside that runs out through the flat face to the mount (camera block)
-            tab = cam_tab(px, py, CLR)
-            s = s.cut(tab.union(tab.translate((0, 0, -1.0))))
-            out = (0.0, math.copysign(1.0, py), 0.0)      # sideways, out of the stem
-        else:
-            out = (math.cos(a), math.sin(a), 0.0)         # radially, into air
-        for zn in LIDAR_NUT_Z:
-            s = s.cut(nut_slot((px, py, z0+zn), out, run=LIDAR_STEM_W/2))
-    for p in holes:
-        p = tuple(p[k] + n[k] for k in range(3))
-        s = s.cut(cyl(M3_CLR, LIDAR_TOP_T+LIDAR_STEM_T+2.0, p, axis=dn))
+        for sy in (-1.0, 1.0):                # at |y| = 41 stands 0.8 mm proud of its
+            y0 = sy*(BODY_W/2-DECK_LIP_W)     # counterbore and reaches into the lip
+            s = s.cut(bxc(x-DECK_LIP_CUT, x+DECK_LIP_CUT, y0, y0+sy*DECK_LIP_W,
+                          z1, z1+DECK_LIP_NOTCH))
     return s
 
 def opi_com():
-    """Centroid of the Orange Pi stack's envelope - the keep-out gps_mount arches over and
-    the point every exporter hangs ELECTRONICS_KG on."""
+    """Centroid of the Orange Pi stack's envelope - the point every exporter hangs
+    ELECTRONICS_KG on."""
     return (OPI_X, 0.0, BODY_Z1+DECK_T+OPI_STAND_H+OPI_BOX[2]/2.0)
 
 def imu_xyz():
@@ -2388,8 +1964,7 @@ def imu_xyz():
     the board's component face - which looks UP off the case plate, so it is the PCB's
     top face.
 
-    Same contract as lidar_pose() and gps_pose(): export_sim.py and
-    ../ros2/.../generate_model.py both read the site from here.  They did not, once - the
+    export_sim.py and ../ros2/.../generate_model.py both read the site from here.  They did not, once - the
     ROS 2 generator wrote pos="0 0 0" while export_sim.py wrote BODY_Z1 - and rl/ loads the
     ROS 2 model, so the 25 mm went straight into the observation the policy trains on."""
     return (IMU_X, IMU_Y, IMU_Z0)
@@ -2439,68 +2014,6 @@ def imu_clear():
             gr = min(gr, math.hypot(dx, dy) - OPI_CASE_POST_R)
     return v, min(gy, gz, gr)
 
-def gps_pose():
-    """The patch antenna's phase centre in robot coordinates.
-
-    Same contract as lidar_pose(): the sim exporters and the ROS 2 generator put the GPS
-    frame here rather than each guessing where the antenna ended up.  A patch radiates
-    about its own normal, which is +Z - the platform is deliberately level, not raked -
-    so the frame needs no axis, only a point."""
-    return (GPS_X, 0.0, GPS_SEAT_Z + GPS_BOARD[2] + GPS_PHASE)
-
-def gps_com():
-    """Centroid of the receiver + patch stack sitting on the platform."""
-    return (GPS_X, 0.0, GPS_SEAT_Z + GPS_STACK[2]/2.0)
-
-def gps_mount():
-    """Trestle over the Orange Pi carrying the NEO-6M and its active patch.
-
-    Two feet on the deck's REAR pair of boss screws, so this part drills nothing: those
-    two M3 x 12 just become M3 x 24 and the deck keeps its eight fixings.  From each foot an arm rises straight up past the Orange
-    Pi and then makes one 45 deg run inboard to the platform; why it turns where it turns,
-    and why the platform's width and its height are the same number, is argued in the
-    parameter block.
-
-    The receiver is strapped down by two ties at +-GPS_TIE_X - outside the 25 mm patch, so
-    the tie bears on bare PCB and not on ceramic - and it is located by them: the four slots
-    sit hard against the board's long edges, so each tie's rising leg is a post at the edge
-    and the board cannot walk sideways out from under them.  Nothing on the platform stands
-    proud of it, and that is a PRINTING constraint, not a styling one - see below.  Nothing
-    holds the board's ends either, on purpose: the 4-pin header leaves one and the u.FL lead
-    the other, and which is which depends on the board variant, of which there are several
-    wearing the same silkscreen.  The patch sits on the board on its own tape, as the module
-    ships.
-
-    IT PRINTS UPSIDE DOWN, on the platform's top face.  That face is the part's one big
-    flat, and the right way up the platform is a 40 x 52 ceiling 33 mm above the bed: the
-    whole thing would print on two little discs and then want support under a table top.
-    Inverted there is nothing to support - the arms grow out of the platform at 45 deg, the
-    vertical run is vertical, the pads end up on top and their @9.6 tops are the only thing
-    left facing the bed.  tools/orient_scan.py: 2018 mm2 of bed against 126 the right way
-    up, 339 mm2 of overhang against 2238.  That is what the capture rails this part used to
-    have cost - 1.2 mm of rail turned the bed face into two 40 x 1.6 strips."""
-    z0 = BODY_Z1 + DECK_T
-    ky, kz = GPS_KNEE
-    px, py, pt = GPS_PLATE
-    pz = GPS_SEAT_Z - pt                              # platform underside
-    s = None
-    for sy in (-1.0, 1.0):
-        a = cyl(GPS_PAD_R, GPS_PAD_H, (GPS_X, sy*GPS_Y, z0))
-        a = a.union(rod((GPS_X, sy*GPS_Y, z0+GPS_PAD_H), (GPS_X, sy*ky, kz), GPS_ROD))
-        a = a.union(rod((GPS_X, sy*ky, kz), (GPS_X, sy*GPS_LAND, pz+1.0), GPS_ROD))
-        a = a.cut(cyl(M3_CLR, GPS_PAD_H+2.0, (GPS_X, sy*GPS_Y, z0-1.0)))
-        s = a if s is None else s.union(a)
-    s = s.union(bxc(GPS_X-px/2, GPS_X+px/2, -py/2, py/2, pz, GPS_SEAT_Z))
-    for sx in (-1.0, 1.0):                            # tie slots, hard against the board's
-        for sy in (-1.0, 1.0):                        # long edges - they ARE the location
-            y0 = sy*(GPS_BOARD[1]/2 + CLR)
-            s = s.cut(bxc(GPS_X+sx*GPS_TIE_X-GPS_TIE[0]/2, GPS_X+sx*GPS_TIE_X+GPS_TIE[0]/2,
-                          y0, y0+sy*GPS_TIE[1], pz-1.0, GPS_SEAT_Z+1.0))
-    # cable notch in the rear edge: the harness turns down here for the Pi's UART, instead
-    # of running over the platform's corner and being chafed by it.
-    s = s.cut(bxc(GPS_X-px/2-1.0, GPS_X-px/2+4.0, -5.0, 5.0, pz-1.0, GPS_SEAT_Z+1.0))
-    return s
-
 def camera_frame():
     """(origin, axis, up) of the module in robot coordinates.
 
@@ -2531,8 +2044,7 @@ def cam_span():
 def camera_pose():
     """Entrance pupil and optical axis, robot coordinates.
 
-    Same contract as lidar_pose() and gps_pose(): every consumer reads the extrinsic from
-    here instead of keeping its own copy.  CAM_OPT is where the pupil sits up the axis
+    Every consumer reads the extrinsic from here instead of keeping its own copy.  CAM_OPT is where the pupil sits up the axis
     from the PCB face and it is marked **verify** - it is the one number on this module
     the drawing does not give."""
     o, n, _ = camera_frame()
@@ -2576,8 +2088,7 @@ def camera_mount():
     Why it is shaped like this rather than like a bracket is argued in the parameter
     block; what the geometry does is this.  The shelf spans the ledge and carries the
     board's lower edge in a slot.  The skirt behind the board steps back CAM_BACK ->
-    CAM_BACK_HI where it passes the deck's top, because above that the only thing keeping
-    it out of the LiDAR bracket is LIDAR_BASE_FLAT.  The wall in front exists only over
+    CAM_BACK_HI where it passes the deck's top.  The wall in front exists only over
     the board's UPPER half - lower down there is 0.5 mm to the fork arm and no wall fits -
     and it is cut away over the lens, which is what stops the mount vignetting its own
     camera.  The board goes in from the +y end and the same two screws that hold the mount
@@ -2611,7 +2122,7 @@ def camera_mount():
     # board, from the lens relief to the board's own end.  See the CAM_CAP block.
     s = s.union(bxc(CAM_BACK_HI, CAM_FRONT, CAM_LENS_D/2+CAM_LENS_REL, y1,
                     top, ptop+CAM_CAP))
-    # the two tabs to the bracket's front bolts, and the patch of skirt + roof each one
+    # the two tabs to the mount's deck bolts, and the patch of skirt + roof each one
     # joins through: the skirt above the deck is 0.5 mm here, so the patch fills it back
     # to the board pocket (cut below, after this) and up to the roof's top.  On the -y
     # side that patch IS the roof over the pocket - the tie the +y side had from CAM_CAP.
@@ -2636,9 +2147,8 @@ def camera_mount():
 
 def cam_tab(px, py, grow=0.0):
     """One tab of the camera mount, in robot coordinates: a CAM_TAB_R pad round the
-    bracket bolt at (px, py), a CAM_TAB_W bar from it back to the mount, CAM_TAB_T thick
-    on the deck's top.  `grow` widens it by a clearance - that is the pocket lidar_mount
-    cuts for it, so the two can never disagree."""
+    deck bolt at (px, py), a CAM_TAB_W bar from it back to the mount, CAM_TAB_T thick
+    on the deck's top.  `grow` widens it by a clearance."""
     z0 = BODY_Z1 + DECK_T
     # `grow` is lateral only: in z the stack deck / tab / disc is a clamp, no air in it
     t = cyl(CAM_TAB_R+grow, CAM_TAB_T, (px, py, z0))
@@ -2646,21 +2156,23 @@ def cam_tab(px, py, grow=0.0):
                        z0, z0+CAM_TAB_T))
 
 def cam_tab_bolts():
-    """(x, y) of the bracket's two front deck bolts - the ones the camera mount hangs
-    on.  Read from the same circle lidar_mount() drills, so they cannot drift apart."""
-    out = []
-    for i in range(LIDAR_N):
-        a = math.radians(360.0*i/LIDAR_N+45.0)
-        px, py = LIDAR_X+LIDAR_BC/2*math.cos(a), LIDAR_BC/2*math.sin(a)
-        if px > LIDAR_X:
-            out.append((px, py))
-    return out
+    """(x, y) of the camera mount's two deck bolts.  chassis_top() drills the deck from
+    the same list, so the two cannot drift apart."""
+    return [(CAM_BOLT[0], CAM_BOLT[1]), (CAM_BOLT[0], -CAM_BOLT[1])]
+
+def cam_bolt_check():
+    """The mount's deck bolt, M3 flat from under the deck: (seat_mm, deck_mm, spare_mm).
+    seat is the head's face above the deck's underside (>= 0 or the head stands proud,
+    into the battery lid); deck is what is left of DECK_T above the cone, under the tab;
+    spare is the thread past the nut on the tab's top."""
+    return (CAM_SEAT_D, DECK_T - CAM_SEAT_D - CAM_SEAT_H,
+            CAM_BOLT_L - (DECK_T - CAM_SEAT_D) - CAM_TAB_T - M3_NUT_H)
 
 def camera_clear(wp):
     """Highest elevation, in degrees off the optical axis, at which a solid still shows up
     inside the frame - and -180 if it is out of frame altogether.
 
-    The camera's analogue of lidar_fov_clear(), and it answers the only question that
+    It answers the only question that
     matters for the job: a 1.6 m face at 2.2 .. 4 m sits at +19 .. +32 deg from this lens,
     so anything of the robot's own bodywork that reaches into that band is in the way of
     the thing the camera is for.  Below it the robot may appear - it is a quadruped, it
@@ -2889,14 +2401,11 @@ def rom_scan_all(step=ROM_STEP):
     THE ONE PLACE THE THREE SCANS ARE SPELLED OUT.  It was written twice - here and in
     export_sim.joint_rom() - and the two copies drifted: the exporter's hip_roll swung a
     bare hip_bracket() against chassis_bottom + cradle_front + servo_dummy alone, with no
-    gps_mount, no camera_mount, no camera module, no thrust bolts and no fork screws, so
+    camera_mount, no camera module, no thrust bolts and no fork screws, so
     --rom-step exported a wider roll joint than mini_dog.py printed.  Same class as the
     servo mass and the MJ_* constants: a number that exists twice is a number that will
     disagree with itself, so both callers come through here.
 
-    gps_mount goes in MIRRORED: it stands over the rear pair of deck bosses and this scan
-    swings the FRONT-left leg, so mirroring it forward is exactly the rear-leg scan
-    against the real one - the legs are mirror images and the roll axis is x.
     The clamp screws go in on the STATIC side of every scan: they belong to the sleeve,
     which belongs to the proximal part, and it is the distal fork that sweeps over them.
     ... and the hub screw HEADS go on the MOVING side: they belong to the fork, and at
@@ -2908,10 +2417,8 @@ def rom_scan_all(step=ROM_STEP):
         "hip_roll": rom_scan(hip_bracket().union(mv(fork_screws(), ROLL_LOC)),
                              PARTS["chassis_bottom"][0]
                                              .union(PARTS["cradle_front"][0])
-                                             .union(mirX(gps_mount()))
                                              .union(camera_mount())
                                              .union(camera_module())
-                                             .union(lidar_module())
                                              .union(mv(servo_dummy(), ROLL_LOC))
                                              .union(mv(thrust_bolts(), ROLL_LOC)),
                              (ROLL_X, ROLL_Y, ROLL_Z), axis=(1,0,0),
@@ -2936,7 +2443,7 @@ def rom_scan_all(step=ROM_STEP):
 # CLAUDE.md's "masses and densities live once" note exists to stop - a part missing from
 # one of them is a robot that weighs different amounts in different simulators.
 BASE_MESHES = ("chassis_bottom", "cradle_front", "cradle_rear", "chassis_top",
-               "lidar_mount", "gps_mount", "camera_mount")
+               "camera_mount")
 BODY_PARTS = BASE_MESHES + ("battery_case", "battery_lid")
 INTERF_TOL = 1.0        # mm3 - under this it is two faces meeting, not two solids sharing
 
@@ -3085,48 +2592,20 @@ def cradle_head_clear():
     # walls are not the same thickness front and back, and this is the wall that matters
     return v, seat - HUB_HEAD_H - PARTS["battery_case"][0].val().BoundingBox().xmax
 
-def gps_clear():
-    """mm3 of gps_mount inside the Orange Pi's envelope - the mast's own binding
-    constraint, and the one thing about it isValid() and interference() cannot see: the
-    Pi is a payload, not a part, so it exists in this model only as OPI_BOX."""
-    cx, _, cz = opi_com()
-    L, W, H = OPI_BOX
-    box = bxc(cx-L/2, cx+L/2, -W/2, W/2, cz-H/2, cz+H/2)
-    return overlap(PARTS["gps_mount"][0].val(), box.val())
-
 def buck_com():
     """Centroid of the buck's envelope on the case top, tape included."""
     return (BUCK_X, BUCK_Y, BUCK_Z0 + (BUCK_TAPE + BUCK_BOX[2])/2.0)
 
 def buck_box():
     """The buck as (centre, size): board, coil and the tape under it.  Both sim exporters
-    hang BUCK_KG on this box; buck_clear() probes it."""
+    hang BUCK_KG on this box."""
     return (buck_com(), (BUCK_BOX[0], BUCK_BOX[1], BUCK_BOX[2] + BUCK_TAPE))
 
-def buck_clear():
-    """The buck between the Pi's case top and the GPS platform.  Returns
-    (overlap_mm3, z_gap, y_gap): mm3 of gps_mount inside the buck's box, the air from the
-    coil's top to the plate's underside, and the air from the board's side to the nearest
-    gps_mount material at the board's own height - the mast arms on their 45 deg run.
-    The buck is a payload, not a part: interference() cannot see it, and the plate is
-    the wall that is thin."""
-    (cx, cy, cz), (L, W_, H) = buck_box()
-    box = bxc(cx-L/2, cx+L/2, cy-W_/2, cy+W_/2, cz-H/2, cz+H/2)
-    gm = PARTS["gps_mount"][0].val()
-    v = overlap(gm, box.val())
-    zgap = (GPS_SEAT_Z - GPS_PLATE[2]) - (cz + H/2)
-    ygap = 40.0
-    for sy in (-1, 1):
-        y0 = cy + sy*W_/2
-        slab = bxc(cx-L/2, cx+L/2, y0, y0 + sy*40.0, cz-H/2, cz+H/2)
-        try:
-            hit = gm.intersect(slab.val())
-            if hit.Volume() > INTERF_TOL:
-                bb = hit.BoundingBox()
-                ygap = min(ygap, (bb.ymin - y0) if sy > 0 else (y0 - bb.ymax))
-        except Exception:
-            ygap = float("-inf")
-    return v, zgap, ygap
+def opi_box():
+    """The Orange Pi's case as a solid - a payload, so interference() cannot see it."""
+    cx, _, cz = opi_com()
+    L, W_, H = OPI_BOX
+    return bxc(cx-L/2, cx+L/2, -W_/2, W_/2, cz-H/2, cz+H/2)
 
 def opi_bolt_check():
     """The case bolt's stack: (engage_mm, seat_mm, boss_mm).  engage is the thread inside
@@ -3137,36 +2616,6 @@ def opi_bolt_check():
     stack = DECK_T + OPI_STAND_H + OPI_CASE_FLOOR
     return (OPI_BOLT_L - (stack - OPI_SEAT_D), OPI_SEAT_D,
             DECK_T + OPI_STAND_H - OPI_SEAT_D - OPI_SEAT_H)
-
-def lidar_bolt_check():
-    """The bracket's deck bolt, M3 x 16 flat from under the deck: (seat_mm, deck_mm,
-    spare_mm).  seat is the head's face below the deck's underside (>= 0 or the head stands
-    proud, into the battery lid - which is how the deck once stopped 2.4 mm above the
-    tray); deck is what is left of DECK_T above the cone, under the bracket's plate; spare
-    is the thread past the nut in the boss."""
-    return (LIDAR_SEAT_D, DECK_T - LIDAR_SEAT_D - LIDAR_SEAT_H,
-            16.0 - LIDAR_SEAT_D - LIDAR_NUT_Z[0] - M3_NUT_H)
-
-def opi_clear():
-    """The Orange Pi's case against the LiDAR bracket in front of it.  Returns
-    (overlap_mm3, gap_mm): mm3 of lidar_mount inside OPI_BOX, and the air between the
-    case's front face and the nearest lidar_mount material at the case's own height -
-    the bracket's rear leg bosses, since the case floor rides over its base disc.  The
-    gap is what fixes OPI_X; the case slides back only at the cost of deck under the
-    rear standoffs."""
-    cx, _, cz = opi_com()
-    L, W, H = OPI_BOX
-    box = bxc(cx-L/2, cx+L/2, -W/2, W/2, cz-H/2, cz+H/2)
-    lm = PARTS["lidar_mount"][0].val()
-    v = overlap(lm, box.val())
-    x1 = cx + L/2
-    slab = bxc(x1, x1+40.0, -W/2, W/2, cz-H/2, cz+H/2)
-    try:
-        hit = lm.intersect(slab.val())
-        gap = (hit.BoundingBox().xmin - x1) if hit.Volume() > INTERF_TOL else 40.0
-    except Exception:
-        gap = float("-inf")
-    return v, gap
 
 def foot_bolt_check():
     """The foot bolt's path, checked against the real solid instead of against the numbers
@@ -3278,8 +2727,6 @@ def build():
     PARTS["cradle_front"]   = (cf, 1, "PETG/ASA, 5 walls, 40% - flange face down")
     PARTS["cradle_rear"]    = (cr, 1, "PETG/ASA, 5 walls, 40% - flange face down")
     PARTS["chassis_top"]    = (chassis_top(),    1, "PETG/ASA, 4 walls, 25%")
-    PARTS["lidar_mount"]    = (lidar_mount(),    1, "PETG/ASA, 4 walls, 30%")
-    PARTS["gps_mount"]      = (gps_mount(),      1, "PETG/ASA, 4 walls, 30% - platform down")
     PARTS["camera_mount"]   = (camera_mount(),   1, "PETG/ASA, 4 walls, 40% - skirt down")
     PARTS["battery_case"]   = (battery_case(),   1, "PETG/ASA, 4 walls, 25% - open side up")
     PARTS["battery_lid"]    = (battery_lid(),    1, "PETG/ASA, 4 walls, 25% - flat")
@@ -3301,14 +2748,11 @@ def assembly(hb, th, sh, ft):
     a.add(PARTS["cradle_front"][0],   name="cradle_front",   color=grey)
     a.add(PARTS["cradle_rear"][0],    name="cradle_rear",    color=grey)
     a.add(PARTS["chassis_top"][0],    name="chassis_top",    color=grey)
-    a.add(PARTS["lidar_mount"][0],    name="lidar_mount",    color=grey)
-    a.add(PARTS["gps_mount"][0],      name="gps_mount",      color=grey)
     a.add(PARTS["camera_mount"][0],   name="camera_mount",   color=grey)
     a.add(PARTS["battery_case"][0],   name="battery_case",   color=dark)
     a.add(PARTS["battery_lid"][0],    name="battery_lid",    color=dark)
     a.add(cell_holders(),             name="cell_holder",    color=grey)
     a.add(camera_module(),            name="camera",         color=dark)
-    a.add(lidar_module(),             name="lidar",          color=dark)
     srv = [mv(servo_dummy(), L) for _, L in JOINTS]
     hub = [mv(hubs(), L) for _, L in JOINTS]
     posed_parts = [("hip_bracket", hb, "hip"), ("thigh", th, "thigh"), ("shin", sh, "shin"),
@@ -3340,17 +2784,10 @@ PRINT_ORIENT = {"chassis_bottom": ((1,0,0),0), "chassis_top": ((1,0,0),0),
                 # the cell holder on its face, bores vertical: a 10 mm plate with
                 # six through holes, no overhang anywhere and nothing to support.
                 "cell_holder": ((0,1,0),90),
-                # base plate DOWN, as modelled: the stem and ribs go straight up, the
-                # seat disc's flanks overhang the stem at 41 deg off vertical at worst.
-                "lidar_mount": ((1,0,0),0),
                 "hip_bracket_A": ((0,1,0),90),
                 "hip_bracket_B": ((0,1,0),90), "thigh_A": ((1,0,0),90),
                 "thigh_B": ((1,0,0),90), "shin_A": ((0,1,0),90), "shin_B": ((0,1,0),90),
                 "foot": ((1,0,0),180), "servo_gauge": ((1,0,0),0),
-                # upside down, on the platform's top face: it is the only flat on
-                # the part (2080 mm2 against 72 on the two pads) and it turns a 40 x 52
-                # unsupported ceiling into the bed itself.  See gps_mount's docstring.
-                "gps_mount": ((1,0,0),180),
                 # on its back skirt: the one big flat.  Stood up the right way this is a
                 # 90 x 20 mm wall on a 4 mm foot.  90 + CAM_TILT lays that face on the bed.
                 "camera_mount": ((0,1,0), 90.0+CAM_TILT)}
@@ -3394,8 +2831,7 @@ def main():
     # The camera module and the IMU board are not printed parts and so are not in PARTS,
     # but both are bolted to the same rigid body and both are the thing with ~1 mm of
     # clearance rather than the bracket that holds it - they have to be in this check.
-    for pname, psolid in (("camera", camera_module().val()), ("imu", imu_module().val()),
-                          ("lidar", lidar_module().val())):
+    for pname, psolid in (("camera", camera_module().val()), ("imu", imu_module().val())):
         for nm in BODY_PARTS:
             v = overlap(psolid, PARTS[nm][0].val())
             if v > INTERF_TOL:
@@ -3403,7 +2839,7 @@ def main():
     for na, nb, v in bad:
         print(f"  !! INTERFERENCE  {na} x {nb}  {v:.1f} mm3")
     if not bad:
-        print(f"  body clear: {' / '.join(BODY_PARTS)} + camera + imu + L2 share no solid")
+        print(f"  body clear: {' / '.join(BODY_PARTS)} + camera + imu share no solid")
     # ... and the two payload gaps interference() cannot see at all: the IMU against the
     # Orange Pi it now shares a standoff gap with, and the battery module's lid against
     # the deck.  The module IS a part, so its solids are covered above; what is not is
@@ -3524,29 +2960,17 @@ def main():
         print(f"  cradle bolts: {len(CRADLE_BOLT)} x M3 x {CRADLE_BOLT_L:.0f} per end,"
               f" heads clear over {CRADLE_REACH:.0f} mm from inside the tray"
               f" (battery module out), {hgap:+.2f} mm of air to the pack")
-    v = gps_clear()
-    if v > INTERF_TOL or v < 0:
-        print(f"  !! GPS MAST  {v:.1f} mm3 of gps_mount is inside the Orange Pi envelope")
+    print(f"  buck:        {BUCK_BOX[0]:.0f}x{BUCK_BOX[1]:.0f}x{BUCK_BOX[2]:.1f} on the case"
+          f" top at x {BUCK_X:.0f}, nothing over it")
+    seat, deck, spare = cam_bolt_check()
+    if seat < 0.0 or deck < 2.0 or spare < 0.5:
+        print(f"  !! CAMERA BOLTS  M3 x {CAM_BOLT_L:.0f} flat: head face {seat:.1f} up from the"
+              f" deck's underside, {deck:.1f} mm of deck above the seat, {spare:.1f} mm past"
+              f" the nut")
     else:
-        print(f"  gps clear:   mast over the {OPI_BOX[0]:.0f}x{OPI_BOX[1]:.1f}x{OPI_BOX[2]:.1f}"
-              f" Orange Pi envelope, knee {GPS_KNEE[1]:.1f}, seat {GPS_SEAT_Z:.1f}")
-    bv, bz, by = buck_clear()
-    if bv > INTERF_TOL or bv < 0 or bz < 1.0 or by < 1.0:
-        print(f"  !! BUCK  {bv:.1f} mm3 of gps_mount inside the buck's box, {bz:.2f} mm to the"
-              f" plate, {by:.2f} mm to the mast arms")
-    else:
-        print(f"  buck clear:  {BUCK_BOX[0]:.0f}x{BUCK_BOX[1]:.0f}x{BUCK_BOX[2]:.1f} on the case"
-              f" top at x {BUCK_X:.0f}, {bz:+.2f} mm under the GPS plate, {by:+.2f} mm to"
-              f" the mast arms")
-    seat, deck, spare = lidar_bolt_check()
-    if seat < 0.0 or deck < 2.0 or spare < 2.0:
-        print(f"  !! LIDAR BOLTS  M3 x 16 flat: head face {seat:.1f} up from the deck's"
-              f" underside, {deck:.1f} mm of deck above the seat, {spare:.1f} mm past the nut")
-    else:
-        print(f"  lidar bolts: 4 x M3 x 16 flat from under the deck, head faces {seat:.1f} mm"
-              f" up the @{2*LIDAR_HEAD_R:.1f} bores, {deck:.1f} mm of deck above the seats,"
-              f" {spare:.1f} mm past the nut")
-    ov, cg = opi_clear()
+        print(f"  camera bolts: 2 x M3 x {CAM_BOLT_L:.0f} flat from under the deck, head faces"
+              f" {seat:.1f} mm up the @{2*CAM_HEAD_R:.1f} bores, {deck:.1f} mm of deck above the"
+              f" seats, {spare:.1f} mm past the nut")
     xr = OPI_X+OPI_HOLE_DX-OPI_HOLES[0]/2 - OPI_STAND_R
     eng, seat, boss = opi_bolt_check()
     if eng < 2.5 or seat < 0.0 or boss < 3.0:
@@ -3557,31 +2981,23 @@ def main():
         print(f"  opi bolts:   4 x M2.5 x {OPI_BOLT_L:.0f} flat from under the deck, head"
               f" faces {seat:.1f} mm up the @{2*OPI_HEAD_R:.1f} bores, {eng:.1f} mm into the"
               f" case's spacers, {boss:.1f} mm of boss above the seats")
-    if ov > INTERF_TOL or ov < 0 or cg < 1.0 or xr < -BODY_L/2:
-        print(f"  !! ORANGE PI  {ov:.1f} mm3 of lidar_mount inside the case, {cg:.2f} mm in"
-              f" front of it, rear standoff foot at x {xr:.1f} on a deck ending at {-BODY_L/2:.0f}")
+    cv = sum(overlap(PARTS["camera_mount"][0].val(), b.val()) for b in (opi_box(),))
+    if cv > INTERF_TOL or cv < 0 or xr < -BODY_L/2:
+        print(f"  !! ORANGE PI  {cv:.1f} mm3 of camera_mount inside the case, rear standoff"
+              f" foot at x {xr:.1f} on a deck ending at {-BODY_L/2:.0f}")
     else:
-        print(f"  opi clear:   case front at x {OPI_X+OPI_BOX[0]/2:.1f}, lidar_mount"
-              f" {cg:+.2f} mm ahead; rear standoff foot at x {xr:.1f},"
+        print(f"  opi clear:   case front at x {OPI_X+OPI_BOX[0]/2:.1f}, clear of the camera"
+              f" mount's tabs; rear standoff foot at x {xr:.1f},"
               f" {xr+BODY_L/2:.1f} mm inside the deck's end")
-    for nm in ("chassis_top", "lidar_mount", "gps_mount", "camera_mount"):
-        mg = lidar_fov_clear(PARTS[nm][0])
-        if mg < 0:
-            print(f"  !! LIDAR FOV  {nm} is {-mg:.1f} deg INSIDE the cone")
-        else:
-            print(f"  lidar fov:   {nm:14s} {mg:+.1f} deg outside the 96 deg cone")
     # ... and the camera's own view.  A 1.6 m face at 2.2 .. 4 m is at +19 .. +32 deg
     # from this lens, so anything of the robot reaching into that band is in the way of
     # the one job the camera has.  Below it the dog may see itself - it is a quadruped.
     hf, vf = camera_fov()
     print(f"  camera:      {hf:.0f} x {vf:.0f} deg at "
           f"{CAM_PIX[0]}x{CAM_PIX[1]}, {CAM_TILT:+.0f} deg nose-up")
-    # The L2 is in this loop because it is what sets LIDAR_SEAT_Z: it hangs over the lens,
-    # and a face band with the sensor's underside in it is a camera with no job.
     for nm, wp in (("chassis_bottom", PARTS["chassis_bottom"][0]),
                    ("chassis_top", PARTS["chassis_top"][0]),
-                   ("camera_mount", PARTS["camera_mount"][0]),
-                   ("lidar (L2)", lidar_module())):
+                   ("camera_mount", PARTS["camera_mount"][0])):
         e = camera_clear(wp)
         if e < -180.0 + 1e-6:
             print(f"  camera view: {nm:14s} out of frame")
@@ -3592,12 +3008,11 @@ def main():
     a = assembly(hb, th, sh, ft)
     a.save(os.path.join(OUT, "mini_dog_assembly.step"))
     tm = sum(r["est_mass_g"]*r["qty"] for r in rows)
-    carried = (N_SERVO*SERVO_KG + BATTERY_KG + BMS_KG + ELECTRONICS_KG + LIDAR_KG
-               + GPS_KG + CAMERA_KG + IMU_KG + BUCK_KG)*1000.0
+    carried = (N_SERVO*SERVO_KG + BATTERY_KG + BMS_KG + ELECTRONICS_KG
+               + CAMERA_KG + IMU_KG + BUCK_KG)*1000.0
     print(f"\n  printed mass  ~{tm:.0f} g   + {N_SERVO} servos {N_SERVO*SERVO_KG*1000:.0f} g"
           f" + 3S2P cells ~{BATTERY_KG*1000:.0f} g + BMS ~{BMS_KG*1000:.0f} g"
           f" + Orange Pi in its case/wiring ~{ELECTRONICS_KG*1000:.0f} g"
-          f" + LiDAR ~{LIDAR_KG*1000:.0f} g + GPS ~{GPS_KG*1000:.0f} g"
           f" + camera ~{CAMERA_KG*1000:.0f} g + IMU ~{IMU_KG*1000:.0f} g"
           f" + buck ~{BUCK_KG*1000:.0f} g  ->  ~{(tm+carried)/1000:.2f} kg")
     print(f"  ROM scan (coarse, {ROM_STEP} deg steps, real solids):")
