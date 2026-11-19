@@ -165,7 +165,7 @@ def parse():
 # in 5 s is not 1563 mm in 10 s, and a rollout at any other --seconds cannot be
 # divided into it or held against it.
 BASELINE_SECONDS = 5.0
-BASELINE_MM = {"flat": 781.7, "heightfield": 552.3}   # 1046e06's model, seed 7
+BASELINE_MM = {"flat": 557.1, "heightfield": 547.6}   # the 220 mm body on 75/55 legs, seed 7
 
 # The battery. Each is (label, vx, vy, yaw): what we ask, in the body frame.
 BATTERY = [
@@ -445,7 +445,10 @@ def rollout_mujoco(mj, policy_jit, env, p, cmd, seconds, shot=None, seed=None):
         # the stance, and a foot spawned inside a bump is a fall at 0.1 s.
         # The highest of the four is the one the robot has to stand on.
         ground = -1.0
-        for fx, fy in [(0.09, 0.076), (0.09, -0.076), (-0.09, 0.076), (-0.09, -0.076)]:
+        P = model_mod.robot_params()        # the stance feet: under the pitch axes
+        for leg in P["legs"]:
+            fx = P["hip_xyz_mm"][leg][0] / 1000.0
+            fy = (P["hip_xyz_mm"][leg][1] + P["hip_to_pitch_mm"][leg][1]) / 1000.0
             dist = mujoco.mj_ray(mj, d, np.array([d.qpos[0] + fx, d.qpos[1] + fy, 1.0]),
                                  np.array([0.0, 0.0, -1.0]), ground_only, 1, -1, geomid)
             if dist >= 0:

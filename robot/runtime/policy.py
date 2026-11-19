@@ -161,6 +161,16 @@ class PolicySource:
                              f"{calib.joints}; both come from robot_params.json — regenerate")
         self.joints = list(calib.joints)
         self.stance = np.array(m["stance_rad"], np.float32)
+        # The action is an offset from the stance, so a policy trained on another stand
+        # pose is a policy for another robot: the joint names match and nothing else does.
+        want = (calib.params or {}).get("stance_rad")
+        if want:
+            ref = np.array([want.get(j.rsplit("_", 1)[1], 0.0) for j in self.joints],
+                           np.float32)
+            if np.abs(ref - self.stance).max() > 1e-3:
+                raise SystemExit("policy stance %s is not robot_params.json's %s - it was "
+                                 "trained for a different geometry; retrain"
+                                 % (m["stance_rad"][:3], ref[:3].tolist()))
         self.lo = np.array(m["soft_lo_rad"], np.float32)
         self.hi = np.array(m["soft_hi_rad"], np.float32)
         self.scale = float(m["action_scale_rad"])

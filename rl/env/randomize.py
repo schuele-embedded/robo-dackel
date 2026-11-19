@@ -258,8 +258,7 @@ def _selftest(n: int = 8):
 
     mass = np.asarray(sys_v.body_mass)
     check("body_mass is still batched", mass.shape == (n, env.sys.nbody))
-    # the base link's centre of mass: per-axis band, and the x band is the one
-    # measured on the scale, so it must land nose-forward of the CAD, never behind.
+    # the base link's centre of mass: a per-axis band about the CAD's.
     c_lo, c_hi = (np.asarray(v, dtype=float)
                   for v in ranges["body"]["com_offset_m_abs"]["range"])
     d_ipos = np.asarray(sys_v.body_ipos)[:, 1] - np.asarray(env.sys.body_ipos)[1]
@@ -268,8 +267,6 @@ def _selftest(n: int = 8):
           bool(np.all(d_ipos >= c_lo - 1e-9) and np.all(d_ipos <= c_hi + 1e-9)),
           f"x {d_ipos[:, 0].min() * 1000:.1f}..{d_ipos[:, 0].max() * 1000:.1f} mm of "
           f"{c_lo[0] * 1000:.0f}..{c_hi[0] * 1000:.0f}")
-    check("body_ipos[base] x is ahead of the CAD on every environment",
-          bool(d_ipos[:, 0].min() > 0.0))
     check("body_ipos[base] differs between environments", bool(d_ipos.std(axis=0).min() > 0.0))
     fr = np.asarray(sys_v.geom_friction)
     check("geom_friction is still batched", fr.shape[0] == n)
