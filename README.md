@@ -1,14 +1,18 @@
-# SmallDog
+# Robo-Dackel
 
-A 12-DOF printed quadruped ("mini robot dog") built around 12 × Feetech/Waveshare
-**ST3215** bus servos — parametric CAD, FEA, a ROS 2 / MuJoCo simulation, an RL policy and
-the hardware runtime, all of one robot.
+A 12-DOF printed quadruped built around 12 × Feetech/Waveshare **ST3215** bus servos, with
+a dachshund's proportions: a 220 mm body on 75 / 55 mm legs, standing 148 mm high.
+Parametric CAD, FEA, a ROS 2 / MuJoCo simulation, an RL environment and the hardware
+runtime, all of one robot. A fork of [alarin/smalldog](https://github.com/alarin/smalldog);
+the package and file names keep that name. **The dachshund exists in CAD and simulation
+only** — [`PLAN.md`](PLAN.md) says what is missing, [`plan/README.md`](plan/README.md) how
+it differs from the original.
 
 | | |
 |---|---|
 | [`3d/`](3d/) | **the source of truth.** Pure code-CAD (CadQuery): every dimension, mass and joint limit lives in [`3d/mini_dog.py`](3d/mini_dog.py). Also linear-static FEA ([`fea.py`](3d/fea.py)) and the URDF/MJCF exporter ([`export_sim.py`](3d/export_sim.py)). |
-| [`ros2/`](ros2/) | ROS 2 workspace: generated description, `ros2_control` wiring, trot gait, teleop, SLAM + Nav2 + room exploration, MuJoCo standing in for the hardware. |
-| [`rl/`](rl/) | the RL walking policy: MJX/Brax PPO against the same generated model. |
+| [`ros2/`](ros2/) | ROS 2 workspace: generated description, `ros2_control` wiring, trot gait, teleop, MuJoCo standing in for the hardware. SLAM + Nav2 + room exploration are in the tree and need a LiDAR this robot does not carry. |
+| [`rl/`](rl/) | the RL walking policy: MJX/Brax PPO against the same generated model. No policy is trained for this body yet. |
 | [`robot/`](robot/) | the hardware side: ST3215 bus driver, the identification bench, the 50 Hz runtime. |
 
 Everything structural is FDM-printed (PETG/ASA): no aluminium, no machining, no external
@@ -35,6 +39,7 @@ change workflow (rebuild → FEA → re-export sim → regenerate the ROS 2 desc
 | Windows/WSL2, RTX 3070 | RL training, the pure-Python sim regressions | [`WSL.md`](WSL.md) |
 | Windows/WSL2, RTX 5070 Ti | RL training with the procedural boxes at full batch | [`GPU.md`](GPU.md) |
 | Orange Pi 5 Pro | the runtime on the robot | [`robot/README.md`](robot/README.md) |
+| Windows/WSL2, no CUDA GPU | CAD, FEA, sim exporters and regressions; no RL training | [`CLAUDE.md`](CLAUDE.md) |
 
 No shared filesystem between them: the git repository is the only thing that crosses.
 

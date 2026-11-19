@@ -451,7 +451,7 @@ DECK_NUT_DZ  = 6.0                    # ... its floor, below the boss top
 # Deck screws as (x, |y|, nut-channel direction), once: chassis_bottom grows a boss under
 # each and chassis_top drills each.
 #
-# ALL FOUR pairs sit at |y| = 41 now, and that is the battery module's doing.  The corner
+# ALL the pairs sit at |y| = 41, and that is the battery module's doing.  The corner
 # pair used to be at 38, which was already 2.7 mm inside the outer cell and only got away
 # with it because the old cradle ended at x = +-42 and the bosses stand at +-52.  The
 # module is 104.9 mm long - it reaches x = +-52 - so those bosses are no longer beside it
@@ -504,8 +504,8 @@ DECK_LIP_CUT   = 6.0                  # ... and its half length along x
 # are nowhere near their limit: worst case, land3g and stall adding, is 22 N of axial and
 # 28 N of shear on an M3, against ~3 MPa of bearing in a 4 mm flange.  What four fasteners
 # do NOT replace is 795 mm2 of welded face for STIFFNESS, and stiffness is the whole point
-# of the joint being here - the roll axis is 27 mm outboard of it and the foot 187 mm
-# below, so a tenth of a millimetre of slop at the flange is 0.7 mm at the ground.  Each
+# of the joint being here - the roll axis is 27 mm outboard of it and the foot 148 mm
+# below, so a tenth of a millimetre of slop at the flange is 0.5 mm at the ground.  Each
 # screw therefore runs through a spigot: the cradle's flange carries a CRADLE_REG_D boss
 # standing CRADLE_REG proud of its face, into a pocket in a locally thickened tray wall.
 # The four spigots take the shear and the torsion; the screws only clamp.
@@ -518,12 +518,13 @@ DECK_LIP_CUT   = 6.0                  # ... and its half length along x
 # swept only on the OUTBOARD side over a +-90 deg ROM, and at |z| <= CRADLE_Z1 it never
 # gets inboard of the axis at all - which is also why the rails have always been allowed
 # to run the full length at |y| <= 14.  So a nut boss may run out to CRADLE_BOSS_X (the
-# servo case starts at 72.5) anywhere that clears ARM_R, and the four screws sit just
+# servo case starts 1 mm past it) anywhere that clears ARM_R, and the four screws sit just
 # inboard of the two arms with ~1.5 mm to spare.  Do not take that on trust: `rom_scan`
 # is what checks the arm, and `cradle_clear()` is what checks a driver can reach the
 # heads - a screw nobody can turn is the failure mode this repo has now shipped twice.
-CRADLE_X      = BODY_L/2              # 63.0 - the joint plane, the tray's end wall face
-CRADLE_T      = 4.0                   # flange depth: 63..67 = (ROLL_X-21.9) - FORK_GAP
+CRADLE_X      = BODY_L/2              # 110.0 - the joint plane, the tray's end wall face
+CRADLE_T      = 4.0                   # flange depth: 110..114 = (ROLL_X-21.9) - FORK_GAP,
+                                      # i.e. ROLL_X - BODY_L/2 has to stay 27
 CRADLE_Y1     = ROLL_Y + 13.11        # 49.11 - flange half width (the old root gusset's)
 CRADLE_Z1     = S_W/2 + SLEEVE_W      # 15.36 - ... and half height.  CAM_LEDGE is this.
 CRADLE_RIB    = 6.0                   # the flange is a FRAME: rib width round the opening.
@@ -545,7 +546,7 @@ CRADLE_BOSS   = 10.0                  # nut boss, square in y and z.  y 12..22 k
                                       # 1 mm off the camera's foot at y = 23 and 1 mm off
                                       # the bus window at y = 11; its nearest corner is
                                       # r = 14.1 from the roll axis against ARM_R = 13.5.
-CRADLE_BOSS_X = ROLL_X - S_H/2 - 1.0  # 71.5 - how far out it runs (servo case at 72.5)
+CRADLE_BOSS_X = ROLL_X - S_H/2 - 1.0  # 118.5 - how far out it runs (servo case at 119.5)
 # The cradle screws land in HEAT-SET INSERTS, the one place on the robot they do.  Not a
 # nut: the side channel the nut had was a sealed cavity (into the rail box), and a pocket
 # open to the servo bore hollows the boss and halves the cradle's SF, see CRADLE_BOLT.
@@ -559,9 +560,9 @@ INS_D, INS_L  = 4.4, 6.0              # M3 heat-set insert: hole diameter and le
                                       # The ones bought: @5.0 knurled body x 6 long; 4.4
                                       # is the usual hole for a @5 body      **verify**
 CRADLE_INS_LIP = 1.0                  # boss left beyond the insert, the stop it seats on
-CRADLE_INS_X0 = CRADLE_BOSS_X - CRADLE_INS_LIP - INS_L    # 64.5 - insert's near end, 1.5
+CRADLE_INS_X0 = CRADLE_BOSS_X - CRADLE_INS_LIP - INS_L    # 111.5 - insert's near end, 1.5
                                       # past the flange face: clear of the spigot
-                                      # (61..63), whose wall the @4.4 bore leaves at 1.3
+                                      # (108..110), whose wall the @4.4 bore leaves at 1.3
 CRADLE_REG_D  = 7.0                   # register spigot on the cradle's flange face ...
 CRADLE_REG    = 2.0                   # ... standing this proud of CRADLE_X
 CRADLE_SEAT   = 2.8                   # tray boss inboard of the wall: it is what makes
@@ -579,8 +580,8 @@ CRADLE_CB     = 2.0                   # that is not tidiness: the front seat's f
                                       # - the part in the way is HARDWARE, so isValid(),
                                       # interference() and rom_scan are all blind to it.
                                       # cradle_head_clear() is what prints the margin.
-CRADLE_BOLT_L = 10.0                  # M3 x 10: counterbore floor 59.4 into the insert
-                                      # (64.5..70.5) by 4.9 of its 6; x 12 would stop
+CRADLE_BOLT_L = 10.0                  # M3 x 10: counterbore floor 106.4 into the insert
+                                      # (111.5..117.5) by 4.9 of its 6; x 12 would stop
                                       # 0.1 mm inside the boss, a burr from the servo
 STRAP_Y       = 21.5                  # the strap's outboard edge where it passes the fork
                                       # arm.  A hard ROM limit, not a guess - see the
@@ -608,7 +609,7 @@ PANEL_REACH   = 20.0                  # ... and how far panel_clear() looks out 
 # seats.  Nothing threads into plastic here either.
 #
 # WHERE IT MAY GO, and two things that were shipped wrong here.  Behind this wall, at
-# |z| < 13 and |y| > 13, are the two rear hip-roll servos - case from x = -72.5, 9.5 mm
+# |z| < 13 and |y| > 13, are the two rear hip-roll servos - case from x = -119.5, 9.5 mm
 # behind the wall.  An XT plug is ~20 mm long.  So a connector inside the cradle frame's
 # opening (y +-43.11, z +-9.36) is behind a servo case unless it is on the centreline,
 # and the centreline is the bus window.  The connector therefore sits ABOVE the cradle
@@ -648,8 +649,8 @@ PANEL_LOW_Z  = BODY_Z0 + 3.0 + PANEL_LOW[1]/2
 # sheet, **verify** on the part), one per polarity, glued in the rear strip: standing on
 # the upper cradle-screw seats, one each side of the centreline, levers toward it, so the
 # pack leads (grommet, z +-4) and the leg pairs (PANEL_LOW, on the floor) both arrive
-# from the middle.  There is no room for a second pair: the strip is 17.6 deep, 14.8
-# behind the seats, and a 221's wire entry is 18.6 - it cannot stand on end.  Five
+# from the middle.  One pair is what the harness needs; the strip behind the module is
+# 77 mm deep on the long tray, so a second would fit where it once could not.  Five
 # positions: the pack lead and four legs.  The charge branch and the buck feed take the
 # fuse holder's stud instead (POWER.md).  The blocks cover the rear cradle's upper
 # screws: they go in after the cradle is bolted on and come out (unglued) before it does.
@@ -681,9 +682,10 @@ OPI_CASE_PCB = 5.5                    # the PCB's -x edge inboard of the case's 
                                       # case face to hole centre before the deck prints
 OPI_X        = -33.0                  # case centre, x.  Micro-SD end forward (+x).
                                       # Every mm further back is a mm less deck under
-                                      # the rear standoffs, which end 1.7 mm inside the
-                                      # deck's end; the connector end hangs 22.5 mm past
-                                      # the rear wall, over the XT30.
+                                      # the rear standoffs, which end 48.7 mm inside the
+                                      # deck's end; the connector end is 24.5 mm inside
+                                      # the rear wall.  -33 keeps the IMU, 33 mm ahead
+                                      # of the case's centre, on the body origin.
 OPI_HOLES    = (58.0, 49.0)           # hole to hole                        drawing
 OPI_HOLE_EDGE = 7.6                   # the +x pair, in from the PCB's +x edge   drawing
 OPI_HOLE_DX  = (-OPI_BOX[0]/2 + OPI_CASE_PCB + OPI_PCB_L - OPI_HOLE_EDGE
@@ -777,9 +779,9 @@ CAM_SEAT_D   = 0.3                    # the head's flat face, up from the deck's
 CAM_SEAT_H   = CAM_HEAD_R - M3_CLR    # ... the 90 deg seat's height, 1.4
 
 # The 12 -> 5 V buck (XL4015, ref/power/README.md) rides on the Orange Pi's case top on
-# foam tape.  It is the only free air the robot has: the rear strip is 14.05 deep, the
-# side strips 8.4, and under the case's rear overhang the rear roll fork sweeps r <= 34.
-# Long axis on x, on the centreline, nothing over it.  It is a MODULE like the battery:
+# foam tape, beside the board it feeds: the tray's side strips are 8.4 deep and the
+# strip behind the battery module is the power node's.  Long axis on x, on the
+# centreline, nothing over it.  It is a MODULE like the battery:
 # 5 V set under load on the bench, CC pot to the top, both pots varnished, the terminals
 # wired, and only then taped down - nothing on it is adjusted in place.
 BUCK_BOX     = (51.3, 26.0, 15.6)     # PCB plan x height to the top of the coil, measured
@@ -830,12 +832,13 @@ CAM_TAIL   = -1.0                     # which way the 70.6 mm tail runs.  -1 = -
 # CAM_TILT is small for the same reason the board is where it is: the slot is 5 mm deep
 # fore-aft and a tilted board eats CAM_BOARD[1]*sin(t) of that.  6 deg costs 1.6 mm and
 # leaves ~1 mm of wall front and back; 15 deg does not fit at all.  What that buys, and it
-# is worth being honest about it: the lens ends up 209 mm off the ground with a 52 deg
-# vertical FOV, so a 1.6 m face is in frame from 2.2 m out and is still >= 90 px across -
-# enough to recognise - to about 4 m.  Closer than 2.2 m the head leaves the top of the
-# frame.  More tilt would fix that and does not fit; a shorter board would.
-CAM_FRONT    = ROLL_X + FORK_Y0 - 0.1 # 68.0 - the mount's front, 0.1 inside the fork arm plane
-CAM_X, CAM_Z = CAM_FRONT - 1.2, 24.5  # 66.8 - the PCB's FRONT face, on the optical axis
+# is worth being honest about it: the lens ends up about 170 mm off the ground with a
+# 52 deg vertical FOV, so a 1.6 m face is in frame from about 2.3 m out and is still
+# >= 90 px across - enough to recognise - to about 4 m.  Closer than that the head
+# leaves the top of the frame.  **verify** - worked out for the 209 mm of the upright
+# robot and only shifted by the 39 mm the stance dropped.  More tilt would fix that and does not fit; a shorter board would.
+CAM_FRONT    = ROLL_X + FORK_Y0 - 0.1 # 115.0 - the mount's front, 0.1 inside the fork arm plane
+CAM_X, CAM_Z = CAM_FRONT - 1.2, 24.5  # 113.8 - the PCB's FRONT face, on the optical axis
 CAM_TILT     = 6.0                    # nose-up, about +y
 CAM_OPT      = 12.0                   # entrance pupil, up the axis from the PCB  **verify**
 CAM_FOV_D    = 90.0                   # the fitted lens, DIAGONAL                 **verify**
@@ -860,15 +863,14 @@ CAM_LEDGE    = CRADLE_Z1              # 15.36 - the front cradle's own top face,
 # mm of skin a side, and the rib was cut in two at both.  There is nowhere else: past the
 # board's end the mount is a 1.3 mm skirt round the insertion path, the rib is 4 mm deep
 # along its whole length, the bosses are full of the cradle bolts, and x 67..73.5 at
-# y > STRAP_Y is the hip bracket's.  So the mount borrows the LiDAR bracket's two FRONT
-# deck bolts: two tabs reach back over the deck into CAM_TAB_T-deep pockets in the base
-# disc's underside and are clamped there, disc over tab over deck, by the same M3 x 16 -
-# the stack is no taller, the pockets are where disc used to be.  The tabs join the
+# y > STRAP_Y is the hip bracket's.  So the mount is held on the DECK: two tabs reach
+# back over it to the mount's own two bolts (CAM_BOLT), each an M3 x 12 flat head from
+# under the deck into a nut on the tab's top.  The tabs join the
 # mount through the skirt above the deck and the roof over the pocket, which is why the
 # roof now runs on both sides of the lens relief.  Nothing closes the open +y end after
 # the board is in: a 4 g board in a CLR-fit slot, the connector's tail down its far end.
 # A stop fin on the cradle's top was tried and dropped as clutter.
-CAM_BACK, CAM_BACK_HI = CRADLE_X, CRADLE_X + 0.6   # 63.0, 63.6 - mount back plane, below /
+CAM_BACK, CAM_BACK_HI = CRADLE_X, CRADLE_X + 0.6   # 110.0, 110.6 - mount back plane, below /
                                       # above the deck's top; CAM_FRONT is beside CAM_X
 CAM_END      = (31.0, -73.0)          # the channel's two ends, in y
 CAM_TAB_T    = 3.0                    # tab thickness, = the pocket's depth in the 6 mm
@@ -1671,8 +1673,8 @@ def chassis_bottom():
         s = s.cut(bxc(xw+PANEL_LIP_T, xw+PANEL_T+1, cy-w/2, cy+w/2, cz-h/2, cz+h/2))
         s = s.cut(bxc(xw-1, xw+PANEL_LIP_T, cy-w/2+PANEL_LIP, cy+w/2-PANEL_LIP,
                       cz-h/2+PANEL_LIP, cz+h/2-PANEL_LIP))
-    # Nothing of the camera's here: the mount hangs off the LiDAR bracket's front bolts
-    # (camera block); nothing of it touches the tray or the cradles.
+    # Nothing of the camera's here: the mount is bolted to the deck (CAM_BOLT, camera
+    # block) and stands on cradle_front's top face; nothing of it touches the tray.
     #
     # There are no fork-access channels here any more.  They used to cut a @6 hole
     # through this part's front corner post and through the lower half of each corner deck
@@ -2875,8 +2877,6 @@ def main():
     else:
         print(f"  holder clear: both caps clear the case and all six cells"
               f" ({hc:.1f} / {hcell:.1f} mm3), {CELL_GAP:.1f} mm of air between cells")
-    # ... and the same invariant per part, against the real 96 deg cone.  camera_mount is
-    # the one that can go wrong quietly: it is the closest thing to the rim now.
     blocked, reach, spare = foot_bolt_check()
     if blocked > 0.05 or reach < 0 or spare < 0:
         print(f"  !! FOOT BOLT  {blocked:.1f} mm of the sole-to-pad run is solid,"

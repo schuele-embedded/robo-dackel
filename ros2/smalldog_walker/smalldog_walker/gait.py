@@ -33,9 +33,8 @@ class TrotGait:
         self.foot_r = p["foot_r_mm"] * mm
         # nominal foot placement in the base frame: under the pitch axis, all four shifted
         # forward by stance_x so the support rectangle sits under the real CoM. The CAD
-        # puts the body's CoM 10 mm ahead of the hip centre; the robot standing on its
-        # own feet holds 2-4x the rear knee load in the front knees and reads 3-6 deg
-        # nose-down on the IMU (2026-09-19), so the CoM is well ahead of that
+        # puts the base link's CoM at the hip centre (+0.3 mm); the short-bodied robot
+        # measured 25-40 mm ahead of its CAD, so expect this to be needed on hardware
         self._hip_dy = {l: p["hip_to_pitch_mm"][l][1] * mm for l in self.legs}
         self.nominal = {}
         self._stance_x = 0.0

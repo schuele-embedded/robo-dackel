@@ -89,6 +89,12 @@ Each of these changed the ENVIRONMENT: a checkpoint from before cannot be compar
 from after, and the next run is a **retrain, not a fine-tune**. All landed 2026-09-09…11;
 no policy trained before them is worth keeping.
 
+- **The body changed** (220 mm body, 55 mm shin, stand pose −30°/73°, no LiDAR or GPS
+  mass; `3d/`): the stance the observation and the action are measured from moved, so
+  did every mass and lever arm. Fall termination is `FALLEN_Z_FRAC` × the stance height
+  now, `FOOT_CLEARANCE_TARGET` 0.033, box height capped at 0.014, and the base CoM band
+  is a guess about the CAD again (`params/domain_rand.json`). **No policy has been
+  trained on it.**
 - **The IMU site moved** (7.6 mm up, `3d/`): a different observation.
 - **The fitted actuator and the measured stall torque** went into the model; the torque
   ceiling handed to MuJoCo is 7.5 N·m, derived (5.0 was silently clipping 13 % of

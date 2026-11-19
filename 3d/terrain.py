@@ -204,7 +204,7 @@ def size_attr(t):
 # under each one moves it by up to the full +-27 mm, so on a rise the far pair is past it.
 #
 # It starts at x = 0.95 and not sooner on purpose.  The 5 s trot of
-# `standalone_sim.py --headless --terrain` reaches ~0.66 m, and CLAUDE.md reads that
+# `standalone_sim.py --headless --terrain` reaches ~0.55 m, and CLAUDE.md reads that
 # distance as the regression signal for a mass or joint-limit change.  Put an obstacle
 # inside it and the number stops meaning that: measured with the course at x = 0.55 it
 # fell from 663 +-62 to 486 +-93 mm, so a real regression would have to beat the noise the

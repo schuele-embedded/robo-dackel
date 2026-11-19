@@ -62,7 +62,7 @@ included, goes to the GPU fine.
 The robot itself is MJX-clean by construction, and this is worth not breaking:
 every mesh in the generated `robot.xml` is `contype="0" conaffinity="0"` — visual
 only — and the whole collision set is 4 capsules (shins), 4 spheres (feet) and 11
-boxes. The LiDAR and camera cylinders are visual, so they cost nothing.
+boxes. The camera's cylinder is visual, so it costs nothing.
 
 So there are three surfaces, and the split is deliberate:
 
@@ -161,6 +161,9 @@ Step 6 is `export_onnx.py`: `python export_onnx.py runs/<name> --bench` writes
 `runs/<name>/policy.onnx` (normaliser + MLP + tanh, opset 13, ~260 kB) and
 `policy.json` (observation layout and scalings, action scale, stance, soft limits,
 joint order). It refuses to write if onnxruntime and brax disagree by more than
-1e-5 on 512 observations. The robot side is `robot/runtime/policy.py`; the two
-files cross machines as files, not through git (`runs/` is ignored).
+1e-5 on 512 observations. The robot side is `robot/runtime/policy.py`. `runs/` is
+ignored, so the two files reach the robot by `export_onnx.py runs/<name> --out policy`
+and a commit of `rl/policy/`. **None is committed for this body**: the last one was
+trained on the 126 mm body and 82 mm shin, and `policy.py` now refuses a policy whose
+stance differs from `robot_params.json`.
 
