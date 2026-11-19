@@ -99,6 +99,9 @@ from env import rewards as rw
 
 CTRL_HZ = 50.0                 # robot/README.md, "The 50 Hz budget"
 ACTION_SCALE = 0.35            # rad per unit action, before the soft-limit clip
+FALLEN_Z_FRAC = 0.6            # base below this fraction of the stance height = fallen.
+                               # It was a 0.10 m literal: 55 % of the 181 mm robot, and
+                               # two thirds of the way down the 151 mm one
 
 # Observation scalings. Not tuning: they put each block within about +-1 so the
 # running normaliser starts from something sane rather than learning the scale.
@@ -693,7 +696,8 @@ class Walk(PipelineEnv):
         info["air_time"] = jnp.where(in_contact, 0.0, air_time + self.dt)
 
         upright = -gravity_b[2]                        # 1 level, 0 on its side
-        done = jnp.where((upright < 0.4) | (ps.qpos[2] < 0.10), 1.0, 0.0)
+        done = jnp.where((upright < 0.4) | (ps.qpos[2] < FALLEN_Z_FRAC * self._stance_z),
+                         1.0, 0.0)
         done = jnp.where(jnp.isnan(ps.qpos).any() | jnp.isnan(ps.qvel).any(), 1.0, done)
 
         # The stride-averaged velocity the tracking terms score (VEL_AVG_TAU).

@@ -183,7 +183,7 @@ class Weights:
 # clearance the environment never rewards. Clearance is a curriculum problem:
 # raise box_height_m_abs and the policy lifts because it must. Do that before
 # raising this weight again.
-FOOT_CLEARANCE_TARGET = 0.04
+FOOT_CLEARANCE_TARGET = 0.033     # 22 % of the 151 mm stance, as 0.04 was of 181
 
 
 def terms(*, cmd, lin_vel_b, ang_vel_b, vel_avg, gravity_b, base_z, stance_z,
