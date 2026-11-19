@@ -179,7 +179,7 @@ def joint_rom(step):
     """{joint: (lo_deg, hi_deg)} in mini_dog's own (front-left) convention.
 
     The scan itself is md.rom_scan_all(), NOT a copy of it: this file used to spell the
-    three sweeps out again against a weaker static set (no camera_mount, no camera
+    three sweeps out again against a weaker static set (no neck or head, no camera
     module, no thrust bolts, no fork screws), so --rom-step exported a wider roll
     joint than mini_dog.py had just printed."""
     if step is None:
@@ -266,9 +266,9 @@ def link_masses(parts):
             # to be a local 92 x 62 x 20 that had already drifted from the ROS 2 side's
             # 100 x 62 x 18.
             + box_mp(md.ELECTRONICS_KG, md.OPI_BOX, md.opi_com())
-            # the camera module in its channel at the nose.  Its own envelope, not a
-            # guess: 90 x 15 mm of board with the lens block on the optical axis.
-            + box_mp(md.CAMERA_KG, (md.CAM_LENS_H, md.CAM_BOARD[0], md.CAM_BOARD[1]),
+            # the camera module on the neck, in the head.  Its own envelope, not a
+            # guess: 15 x 90 mm of board on end with the lens block on the optical axis.
+            + box_mp(md.CAMERA_KG, (md.CAM_LENS_H, md.CAM_BOARD[1], md.CAM_BOARD[0]),
                      md.camera_com())
             + box_mp(md.IMU_KG, md.imu_box()[1], md.imu_box()[0])
             # the buck on the Pi's case top

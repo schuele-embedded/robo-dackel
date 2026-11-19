@@ -5,7 +5,8 @@ servos. Everything structural is FDM-printed (PETG/ASA); no aluminium, no machin
 external bearings — per `mini_dog_codex_handoff.md`.
 
 This is the dachshund: a 220 mm body (274 mm wheelbase) on 75 / 55 mm legs, standing
-148 mm at the base, 2.32 kg, carrying a camera and an IMU and neither LiDAR nor GPS. **It
+148 mm at the base, 2.36 kg, with a printed head, neck and tail, carrying a camera in the
+head and an IMU and neither LiDAR nor GPS. **It
 has not been built.** Every number below that was measured on an assembled robot was
 measured on the original short-bodied one; numbers about bought parts (servo, Pi, IMU,
 camera, battery) carry over as they are.
@@ -55,8 +56,8 @@ distal link   ──► FORK   : two arms lying on the two aluminium hubs, 4 × 
 - the stock passive hub is used as supplied — no 628/685 bearings.
 
 Range of motion is measured by swept boolean interference against the real solids
-(`rom_scan()`), with the thrust screws, the hub screw heads, the cradles, the camera and
-its mount in the static set. It reads roll ±90, pitch ±90, knee ±110; ±90 is where the
+(`rom_scan()`), with the thrust screws, the hub screw heads, the cradles, the camera, the
+neck and the head (and the tail, mirrored forward) in the static set. It reads roll ±90, pitch ±90, knee ±110; ±90 is where the
 scan window stops, not where the leg fouls.
 
 ### The thrust clamp
@@ -105,8 +106,8 @@ cradles and unbolt four servos".
   spine's annulus is swept only outboard. Screws at (±17, ±7), nearest boss corner at
   r = 14.1 against `ARM_R` = 13.5. `rom_scan` checks the arm; `cradle_clear()` checks a
   driver reaches the heads; `cradle_head_clear()` checks the heads against the battery
-  module (1.65 mm ISO 7380 heads on a seat 1.25 mm off the pack — hence `CRADLE_CB` = 2 mm
-  of counterbore).
+  module (1.65 mm ISO 7380 heads in `CRADLE_CB` = 2 mm of counterbore; on the long tray the
+  pack is 47 mm away).
 - **The screws land in heat-set inserts — the one place on the robot they do.** The nut
   they had sat in a side channel "toward the centreline", into the rail box, which is solid
   there: a sealed cavity that printed and passed every check. A pocket open to the servo
@@ -121,7 +122,7 @@ cradles and unbolt four servos".
   1.8 → 1.3 mm — thin; keep the iron off it and let the insert do the pushing. `cradle_insert_clear()` sweeps the bore from open air to the seat, checks
   the lip is there and that the M3 × 10's tip stays inside the boss.
 - **The flange is a frame**, and its opening is what lets the rear connector panel out.
-- **`cradle_front` is the weakest printed part** — inter-layer SF 1.54 at `land3g`
+- **`cradle_front` is the weakest printed part** — inter-layer SF 1.51 at `land3g`
   (`fea.py --orient`). The first FEA of it fixed a 1.4 mm notch and a 27.6 mm step in the
   strap (peak 53.7 → 29.7 MPa); the rest is structural, and the three obvious fixes each
   made it worse. `CLAUDE.md` has the rule.
@@ -222,9 +223,10 @@ because a tool crossing those spline faces makes the OCC boolean silently return
   cells. The **brick** fills the rest to the thickened 7.5 mm front wall, the module's only
   screwed fixing: the lid's rear edge slides into a groove in the rear wall, its front edge
   takes two M2.5 into the front one. Two vents high in the rear wall — a cell that vents
-  goes out the back, away from the deck. `BATT_X` = 15 is forward of the body origin on
-  purpose: the Orange Pi sits at x = −33 on the deck, and the pack at +15 puts the base
-  link's CoM at x = +0.3 mm. The tray has 47 mm free in front of the module and 77 behind.
+  goes out the back, away from the deck. `BATT_X` = 10 is forward of the body origin on
+  purpose: the Orange Pi sits at x = −33 on the deck, and the pack at +10 balances it, less
+  what the neck and head add up front: the base link's CoM is at the hip centre,
+  x = 0.0 mm. The tray has 52 mm free in front of the module and 72 behind.
 
   What it cost: a case needs ~3.5 mm the bay did not have, and the only 3.5 mm near it was
   the IMU's slot, so the IMU moved out of the tray; the twelve deck screws (x = ±18, ±58.5,
@@ -281,49 +283,72 @@ because a tool crossing those spline faces makes the OCC boolean silently return
   the case (`OPI_CASE_PCB` = 5.5, **verify**: measure case face → hole centre before the
   deck prints). Micro-SD end forward, `OPI_X` = −33: the case spans x = −85.5…19.5, all of
   it on the deck (the rear standoffs' feet end 48.7 mm inside the deck's end), and
-  `opi_clear()` reads it against the camera mount's tabs.
+  the build's `opi clear` line reads it against the neck, the head and the tail.
 - **Camera** — Weinan **WN-L2101.K203L** (Sony IMX415, 1/2.8", 8 MP, fixed-focus M12,
-  USB 2.0 UVC), `camera_mount`. It is the robot's only exteroceptive sensor.
+  USB 2.0 UVC), in the head, on `neck` (*Head, neck and tail*). It is the robot's only
+  exteroceptive sensor.
   - **A 90 × 15 × 1.6 mm strip**, optical axis 70.59 mm from the connector end, ⌀14 M12
-    holder 16.2 mm off the board — off the vendor drawing, transcribed in
+    holder 16.2 mm off the board, two ⌀2.2 ears at 18 mm pitch straddling the lens — off
+    the vendor drawing, transcribed in
     [ref/camera/](ref/camera/) with its two uncertain readings flagged.
-  - **Exactly one place it fits, and its three walls are measured parts**: floor the cradle's
-    top face at `CAM_LEDGE` = 15.36, back the chassis front face at x = 110, front the
-    hip-roll fork's rear arm at `ROLL_X + FORK_Y0` = 115.1 — a disc sweeping r ≤ 34 over the
-    roll ROM; above it is open air. The board lives in the 5 mm deep slot that
-    leaves; only the lens goes past 115.1 (on the centreline it stays 36.3 mm from either
-    roll axis). Landscape at z = 23 clashes with hip roll from +5°; under the belly the
-    front legs sweep every height from +30° of pitch — both built and measured.
-  - **`CAM_TILT` = 6°, a fit**: a tilted board eats 15·sin t of the 5 mm slot; 6° leaves
-    ~1 mm front and back, 15° does not fit. The lens ends up about 170 mm off the ground
-    (**verify**) with an 82 × 52° field: a 1.6 m face is in frame from 2.2 m out and ≥ 90 px
-    across to ~4 m (distances worked out for a lens 39 mm higher — **verify**).
-  - **The mount is a C-section on the gusset's own top face** — the only flat surface near
-    the camera. The board slides in endwise and is trapped: a slot below, a wall in front
-    of its upper half, a skirt behind, and a `CAM_CAP` = 1.2 mm roof over the near end that
-    ties the front wall to the skirt. **It stands on the cradle and is bolted to the deck**:
-    two 3 mm tabs reach back over the deck's top to `CAM_BOLT` = (`BODY_L`/2 − 9, ±16), each
-    on its own M3 × 12 ISO 10642 flat head from under the deck, through the tab, into a
-    washer and nut on the tab's top. Flat heads because nothing may stand proud under the
-    deck; `cam_bolt_check()` reads the head faces 0.3 mm up their ⌀6.2 bores, 2.3 mm of deck
-    above the seats and 2.6 mm of thread past the nut. Not into the cradle: two M3 into its
-    flange rib (a ⌀3.4 hole through a rib 4 mm deep) cut the rib in two. Past the board's
-    end the mount is a 1.3 mm skirt round the insertion path, so there is nowhere on it to
-    seat a head either. Nothing closes the open +y end once the
-    board is in — a 4 g board in a `CLR`-fit slot, its connector tail down the far end. 5.2 g.
-    ("Slides in endwise" is not a rigid straight slide — the ⌀14 lens holder cannot pass the
-    front wall — so the real motion is a tilt-in.)
-  - `camera_clear()` reports the highest elevation at which a solid shows in the frame; a
-    face at 2.2…4 m sits at +19…+32°. Every static part reads **out of frame**, and
-    `export_sim.py --check`'s render from the model's own `<camera>` agrees (0.0 % robot) —
-    that render is also the only check that catches a wrong quaternion.
-  - Two frames: `camera_link` is REP-103 (+X out of the lens), `camera_optical_frame` is
-    REP-145 (+Z out, +X right, +Y down), differing by (−90°, 0, −90°). MuJoCo looks down its
+  - **In the head, standing on end.** The lens is 19.4 mm from one end of a 90 mm board,
+    so the board cannot lie across a head 46 mm wide. It stands upright: PCB front face at
+    `CAM_X` = 100, optical axis at `CAM_Z` = 104, the lens looking out of the forehead, the
+    70.6 mm tail running down inside the neck, the USB lead dropping through an 11 × 14 mm
+    hole in the neck's foot and the deck (`NECK_CABLE`). `CAM_TILT` = 0: the optical axis
+    is the board's normal, so a neck leaning forward by t looks down by t, and the neck is
+    a vertical column.
+  - **The image is portrait** (`CAM_ROLL` = 90). The sensor frame is still 3840 × 2160,
+    82 × 52°, and the pipeline turns it a quarter turn: 52° wide × 82° tall in the world.
+    The lens is 252 mm off the ground standing (**verify**): a 1.6 m face is in frame from
+    about 1.55 m out and ≥ 90 px across to ~4 m (**verify**).
+  - `camera_clear()` reports the highest elevation above the horizon at which a solid
+    shows in the frame, tested in the image's own axes so it follows `CAM_ROLL`; a face at
+    1.6…4 m sits at +19…+41°. **The snout is in the picture**, bottom centre, from 21.4°
+    below the horizon down: the build prints `camera view: head up to -21.4 deg, below the
+    face band` and every other static part **out of frame**, and `export_sim.py --check`'s
+    render from the model's own `<camera>` reads 20.0 % of the frame as the robot
+    (**verify** on the module) — that render is also the only check that catches a wrong
+    quaternion.
+  - Two frames: `camera_link` is REP-103 (+X out of the lens) and carries the 90° roll
+    about it, so that `camera_optical_frame` — REP-145 (+Z out, +X right, +Y down),
+    differing by (−90°, 0, −90°) — has the rotated image's axes. MuJoCo looks down its
     own −Z with +Y up, so [camera.py](camera.py) builds that quaternion from the axes.
   - **verify**: `CAM_OPT` (12 mm), `CAM_FOV_D` (the catalogue's single number, read as the
     diagonal), `CAMERA_KG` (12 g, unweighed). `CAM_RATE` is measured: 20 fps under auto
-    exposure indoors, 30 with a ≤ 10 ms exposure; the frame arrives upside-down
-    ([ref/camera/README.md](ref/camera/README.md)).
+    exposure indoors, 30 with a ≤ 10 ms exposure
+    ([ref/camera/README.md](ref/camera/README.md)); which quarter turn the frame of a
+    board on end needs is **verify**.
+
+## Head, neck and tail
+
+Three printed parts on the deck, none of them in a torque path. Each stands on a 3 mm foot
+plate held by M3 × 12 flat heads (ISO 10642) **from under the deck**, through the foot,
+into a washer and nut on the foot's top — six in all, `deck_flat_bolts()`. Flat heads
+because nothing may stand proud under the deck (the battery lid is 0.6 mm below);
+`deck_flat_check()` reads the head faces 0.3 mm up their ⌀6.2 bores, 2.3 mm of deck above
+the seats and 2.6 mm of thread past the nut.
+
+- **`neck`** (20.6 g; print bbox 30 × 50 × 93, foot down, no support) — **the camera's
+  mount**. A U-channel open to the rear on a foot plate: front wall 2.4 mm, two side
+  walls 3.0 mm, 17.6 mm deep (the board, its 5.2 mm connector and 10 mm for the plug), up
+  to z = 122, the board standing 1.4 mm proud of it. The board goes in from behind, flat
+  against the front wall's inner face, its lens holder out through a hole in that wall,
+  and is held by 2 × M2 × 8 through the wall and the board's two ears into M2 nuts on the
+  board's back — reachable because the back is open. The lead drops down the channel
+  behind the board. Foot: four of the deck bolts, at x = 84 and 102, |y| = 19.
+- **`head`** (21.6 g; print bbox 63.6 × 49.0 × 104.1, on the skull's flat back face,
+  nose up, no support) — a 1.2 mm shell (three 0.4 perimeters), a **ruled** loft through
+  the `HEAD_PROFILE` sections (a smooth loft overshoots at the stop and the shell comes
+  back invalid): a skull 44 long, 56 tall and 46 wide; a stop; a snout out to x = 172 with
+  a nose ball, drooping because every mm it drops is frame the camera gets back; two ear
+  plates whose rear edges are raked 50° so they print; a ⌀20 opening in the forehead the
+  lens looks through. It slips down over the neck's top (`HEAD_FIT` = 0.35 a side) and
+  **one M3 × 50** goes through head and neck side to side into a nut, at `HEAD_PIN_XZ` =
+  (92, 118): above the ears, through two internal ribs. That is its only fastener.
+- **`tail`** (9.1 g; print bbox 95.8 × 72.2 × 30.0, on its side) — a 7 mm blade in the
+  x–z plane rising off the rear deck to (x −182, z 100), on a foot held by the other two
+  deck bolts at x = −98, |y| = 9, between the two WAGO lever nuts.
 
 ## Cables
 
@@ -358,7 +383,9 @@ Still open: the model puts the two roll servos' port ends 1.8 mm apart at |y| = 
 | `cradle_front` | 1 | PETG/ASA, 5 walls, 40 % — flange face down |
 | `cradle_rear` | 1 | PETG/ASA, 5 walls, 40 % — flange face down |
 | `chassis_top` | 1 | PETG/ASA, 4 walls, 25 % |
-| `camera_mount` | 1 | PETG/ASA, 4 walls, 40 % — back skirt down |
+| `neck` | 1 | PETG/ASA, 4 walls, 30 % — foot down |
+| `head` | 1 | PETG/ASA, 3 walls, 0 % — on its back face, nose up |
+| `tail` | 1 | PETG/ASA, 4 walls, 30 % — on its side |
 | `battery_case` | 1 | PETG/ASA, 4 walls, 25 % — open side up, no support |
 | `battery_lid` | 1 | PETG/ASA, 4 walls, 25 % — flat |
 | `cell_holder` | 2 | PETG/ASA, 3 walls, 30 % — bores vertical, no support |
@@ -370,7 +397,7 @@ Still open: the model puts the two roll servos' port ends 1.8 mm apart at |y| = 
 
 `_A` = FL + RR, `_B` = FR + RL (the two chiralities; front/rear are the same part rotated).
 The cradles are two distinct prints, not a mirrored pair (the rear carries the panel
-openings' frame, the front the camera's ledge). Both print flange-down — the only build direction with the servo bores
+openings' frame). Both print flange-down — the only build direction with the servo bores
 vertical, which a press fit wants more than the stronger lying-flat orientation.
 
 STLs in `out/stl/` are rotated into their print orientation (`PRINT_ORIENT`), which is
@@ -379,7 +406,7 @@ measured with `tools/orient_scan.py` and then sliced, not chosen by eye. For `hi
 hip bracket on its Y face would save 17 g of support for a third of its interlayer margin.
 Support mass is set by the parts' own internal ceilings, not the threshold angle.
 
-Printed mass is **~868 g** by `mini_dog.py`'s estimate; this body has not been sliced, so
+Printed mass is **~913 g** by `mini_dog.py`'s estimate; this body has not been sliced, so
 there is no plate split or print time for it yet (**verify**). The fill factors behind the
 estimate were sliced in OrcaSlicer for a 0.4 nozzle at 0.2 mm on the short-bodied parts.
 The parts are thin-walled, so the walls set the mass: measured fill factors run
@@ -417,7 +444,9 @@ Counts are per robot and come off the geometry: 12 joints × (one `sleeve()` + o
 | M2.5 × 11, hex-socket flat (ISO 10642) (deck, from below → spacer boss → Pi case plate → the case's brass spacers) | 4 |
 | M2.5 × 8 **thread-forming**, no nut (battery lid → the module's front wall) | 2 |
 | foam strip, ~1.4 × 20 × 90 mm (over the battery lid, under the deck — the gap is 0.60 mm) | 1 |
-| M3 × 12, hex-socket flat (ISO 10642) + M3 washer + M3 nut (deck, from below → camera mount tab, nut on the tab's top) | 2 |
+| M3 × 12, hex-socket flat (ISO 10642) + M3 washer + M3 nut (deck, from below → the neck's foot ×4 and the tail's ×2, nut on the foot's top) | 6 |
+| M2 × 8 + M2 nut (neck's front wall → camera board's ears, nut on the board's back) | 2 |
+| M3 × 50 + M3 nut (head → neck, side to side) | 1 |
 | cable tie, 2.5 mm (servo leads at the roll and pitch crossings, 2 per fork) | 16 |
 | WAGO 221-415 lever nut (power node, P+ and P−; hot glue) | 2 |
 | 18 AWG silicone, red + black (fused node → each leg, ~0.4 m a leg) | 2 × 1.6 m |
@@ -436,10 +465,10 @@ Lengths that are derived, and where a longer screw is *not* the safe direction:
   the Pi's own screw shares from the top. 4.55 mm of boss carries the seat; a 1.5 mm
   key reaches the head through the Ø5.2 bore. On a deck printed before this, drill
   Ø5.2 to 4.8 deep from below and countersink — `opi_bolt_check()` prints the numbers.
-- **camera mount, M3 × 12 flat, from below**: the head sits in a 90° seat in the deck's
+- **neck and tail, M3 × 12 flat, from below**: the head sits in a 90° seat in the deck's
   underside, its face 0.3 mm up a Ø6.2 bore, 2.3 mm of deck left above the cone under the
-  mount's 3 mm tab, which is what the bolt clamps; 2.6 mm of thread stands past the nut,
-  less the washer — `cam_bolt_check()` prints the numbers.
+  part's 3 mm foot, which is what the bolt clamps; 2.6 mm of thread stands past the nut,
+  less the washer — `deck_flat_check()` prints the numbers.
 - **cradle, M3 × 10**: counterbore floor 106.4 into the insert at 111.5…117.5 by 4.9 of its
   6; × 12 would stop 0.1 mm inside the boss, a burr from the servo's rear face.
 - **foot, M3 × 30**: head seats `FOOT_CB_Z` = 8 mm below `FOOT_Z` in the sole's ⌀6.4
@@ -482,8 +511,8 @@ off repeatedly wants a nut. Both radii are **verify**: print a coupon first.
    from the flange face, through the spigots, on an M3 screw with the iron on its head,
    until they bottom (see *The cradle joint*).
 4. Cradles onto the tray, **before the battery module**: spigots into their pockets, four
-   M3 × 10 from *inside* the tray into the counterbored seats. The front seats sit 1.25 mm
-   off the module's face, so heads first, pack after. The power node's two lever nuts are
+   M3 × 10 from *inside* the tray into the counterbored seats. The driver's run crosses the
+   module's place, so heads first, pack after. The power node's two lever nuts are
    glued onto the rear upper seats **after** these screws — they cover them.
 5. Legs: hip bracket → thigh → shin → press the TPU foot onto the ⌀18 spigot → M3 × 30 up
    through the foot into the nut in the ankle slot (the slot is above the foot's top face,
@@ -497,9 +526,13 @@ off repeatedly wants a nut. Both radii are **verify**: print a coupon first.
    tray bosses' slots (**all twelve before the module**) → XT30 into its pocket from
    inside → battery module into its seat, foam
    strip on its lid, servo bus and leg power out through the side ports and the low
-   windows (never across the top) → camera mount's two
-   tabs onto the deck's top, bolted **from underneath, deck off** (2 M3 × 12 flat, washer
-   and nut on each tab) → camera board into the mount from the +y end → BMI088 taped to the Pi case's plate, wired to the Pi's I2C pads, Pi case
+   windows (never across the top) → neck's foot onto
+   the deck's top, bolted **from underneath, deck off** (4 M3 × 12 flat, washer
+   and nut on the foot) → camera board into the neck from behind, lens holder through the
+   front wall, 2 M2 × 8 through wall and ears into the nuts on the board's back → its lead
+   down through the hole in the foot and the deck → head down over the neck, M3 × 50
+   through both, side to side, into its nut → tail's foot onto the rear deck, likewise from
+   underneath (2 M3 × 12 flat, washer and nut) → BMI088 taped to the Pi case's plate, wired to the Pi's I2C pads, Pi case
    bolted to the deck **from underneath, deck off** (4 M2.5 × 11) → deck onto the tray → servo bus adapter.
 8. Zero all joints at the mechanical zero pose (legs straight down) before powering the
    gait.
@@ -560,7 +593,8 @@ longer has: there is no `lidar` site and no `lidar_*` numerics in the compiled m
 3. Rear-panel connector body — XT30 12.0 × 6.6 — is catalogue. A pocket 0.3 mm small is a
    connector that does not go in.
 4. Servo cable/connector envelope: the sleeve window is 15 × 12 mm at the far end face.
-5. Camera: `CAM_OPT`, the FOV reading, the mass, the lens height. BMI088: board thickness,
+5. Camera: `CAM_OPT`, the FOV reading, the mass, the lens height, how much of the
+   portrait frame the snout takes, the board's fit in the neck. BMI088: board thickness,
    the header.
 6. `M3_TAP` / `M25_TAP`: print a coupon.
 7. The whole body: nothing of the 220 mm tray, the 55 mm shin or the −30° / 73° stand pose

@@ -57,7 +57,7 @@ def spec():
     hf, vf = md.camera_fov()
     p, _ = md.camera_pose()
     return dict(pos=tuple(v/1000.0 for v in p), hfov=hf, vfov=vf,
-                pix=md.CAM_PIX, rate=md.CAM_RATE, tilt=md.CAM_TILT)
+                pix=md.CAM_PIX, rate=md.CAM_RATE, tilt=md.CAM_TILT, roll=md.CAM_ROLL)
 
 
 def axes():
@@ -102,10 +102,11 @@ def urdf_links(parent="base_link", name="camera"):
     p, _ = md.camera_pose()
     p = tuple(v/1000.0 for v in p)
     t = math.radians(md.CAM_TILT)
+    r = math.radians(md.CAM_ROLL)      # about the lens axis: +Z of the link is the image's up
     return [f'  <link name="{name}_link"/>',
             f'  <joint name="{name}_joint" type="fixed">',
             f'    <parent link="{parent}"/><child link="{name}_link"/>',
-            f'    <origin xyz="{_f(p)}" rpy="0 {-t:.6g} 0"/>',
+            f'    <origin xyz="{_f(p)}" rpy="{r:.6g} {-t:.6g} 0"/>',
             '  </joint>',
             f'  <link name="{name}_optical_frame"/>',
             f'  <joint name="{name}_optical_joint" type="fixed">',

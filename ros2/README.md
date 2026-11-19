@@ -3,7 +3,8 @@
 12-DOF quadruped simulation for the printed ST3215 dog designed in [`../3d`](../3d):
 description → ros2_control → gait node, with MuJoCo standing in for the hardware.
 
-The model is the dachshund: hips at x = ±137 mm, 75 / 55 mm legs, 2.32 kg, a camera and an
+The model is the dachshund: hips at x = ±137 mm, 75 / 55 mm legs, 2.36 kg, a printed head, neck and
+tail, a camera in the head and an
 IMU, **no LiDAR and no GPS**. That robot has not been built: every number below measured
 on hardware (the floor runs, the bench, the room exploration) was measured on the original
 short-bodied robot, which carried an L2, and is **verify** for this body.
@@ -147,11 +148,11 @@ nothing there is worth optimising.
 Current self-test:
 
 ```
-model ok: 18 dof, 12 actuators, mass 2.318 kg
-  stand    z= 145.7 mm  roll= +0.0 pitch= +0.0
-  hold 1s  z= 145.6 mm  roll= +0.0 pitch= +0.0  drift= 17.2 mm
-  trot 5s  z= 144.7 mm  roll= +0.5 pitch= +0.2  travelled x= 557.1 mm  y=  -2.7 mm
-  turn 4s  z= 144.9 mm  roll= +0.5 pitch= +0.4
+model ok: 18 dof, 12 actuators, mass 2.363 kg
+  stand    z= 145.6 mm  roll= -0.0 pitch= +0.0
+  hold 1s  z= 145.6 mm  roll= -0.0 pitch= +0.0  drift= 17.4 mm
+  trot 5s  z= 144.6 mm  roll= +0.6 pitch= +0.2  travelled x= 556.2 mm  y=  -3.3 mm
+  turn 4s  z= 144.3 mm  roll= +1.0 pitch= +0.6
 RESULT: OK — stands and trots forward
 ```
 
@@ -164,9 +165,9 @@ says how to read the baseline, which is (the WSL2 box, MuJoCo 3.12.0):
 
 | arm | reads |
 |---|---|
-| flat trot, 5 s | 557.1 mm |
-| terrain, seeds 7…12 | 548 / 530 / 464 / 387 / 444 / 543 mm, all upright |
-| course, seeds 7 / 8 / 9 | 4/7 cleared at 2468 mm, 0/7 at 1046 mm, 0/7 at 949 mm, all upright |
+| flat trot, 5 s | 556.2 mm |
+| terrain, seeds 7…12 | 526 / 529 / 453 / 373 / 355 / 538 mm, all upright |
+| course, seeds 7 / 8 / 9 | 4/7 cleared at 2322 mm, 0/7 at 1048 mm, 0/7 at 1043 mm, all upright |
 
 ## Rough ground
 
@@ -203,7 +204,7 @@ the relief and nothing else. `--course` walks it:
 ```
 course: log at 950, ramp_up at 1583, deck at 1875, ramp_dn at 2166, wall at 2600, ...
   cleared 4/7: log ramp_up deck ramp_dn
-  furthest x while inside the course corridor: 2468 mm
+  furthest x while inside the course corridor: 2322 mm
 RESULT: upright ...
 ```
 
@@ -453,7 +454,7 @@ lengths, hip offsets, the three limit ladders, the rate ceiling, the nominal sta
 
 | | |
 |---|---|
-| total mass | 2.318 kg (base 1.422 kg incl. battery, Orange Pi, buck, camera, IMU) |
+| total mass | 2.363 kg (base 1.468 kg incl. neck, head, tail, battery, Orange Pi, buck, camera, IMU) |
 | leg reach | 82…126 mm from the hip-pitch axis → usable body height 124…141 mm |
 | joints | `{fl,fr,rl,rr}_{roll,pitch,knee}` — 12 servo IDs 1…12 in that order |
 | joint limits | roll ±1.5708, pitch ±1.5708, knee ±1.9199 rad — **read** from the CAD ROM scan (`3d/out/bom.json`) via `export_sim.joint_rom()`, so the two exporters cannot drift |
@@ -463,6 +464,7 @@ lengths, hip offsets, the three limit ladders, the rate ceiling, the nominal sta
 | nominal stance | base 151 mm above ground (hip pitch −30°, knee 73°, read from `mini_dog.py`), gait default 133 mm |
 | meshes | 13 link meshes + 12 ST3215 bodies (visual only — their mass is in each link's `<inertial>`) |
 | links | `base_link` + `{leg}_hip` / `{leg}_thigh` / `{leg}_shin` (foot fused into shin), plus fixed `camera_link` and `camera_optical_frame` |
+| camera | in the head, the board standing on end: lens 252 mm off the ground standing, image **portrait**, 52° wide × 82° tall (the sensor frame is still 3840 × 2160; the pipeline rotates it). `camera_link` (+X out of the lens) is rolled 90° about the lens axis (rpy roll 1.5708), so `camera_optical_frame` has the rotated image's axes. The snout is in frame, bottom centre, from 21.4° below the horizon down. The field, the height and the snout's share of the frame are **verify** |
 
 `robot_params.json` keeps **one magnitude per kind** in `joint_limits_rad` and
 `joint_soft_limits_rad`, because every consumer reads it that way; the signed per-leg pairs
@@ -722,7 +724,7 @@ Import* `smalldog_hardware/foxglove/robot.json`. What it shows:
 
 | panel | topic | from |
 |---|---|---|
-| camera | `/camera/image/compressed` (jpeg, 720p, ~20–30 fps) | `camera_node.py`: the module's own MJPEG frames through `ffmpeg -c:v copy`, nothing decoded; the panel rotates 180° because the board is mounted upside-down |
+| camera | `/camera/image/compressed` (jpeg, 720p, ~20–30 fps) | `camera_node.py`: the module's own MJPEG frames through `ffmpeg -c:v copy`, nothing decoded; the panel's rotation has to follow the board, which stands on end in the head (a quarter turn; which way is **verify**) - the layout still carries the 180° of the old mount, where the board was upside-down |
 | 3D: map, scan, costmap, plan, the robot | `/map`, `/scan`, `/global_costmap/costmap`, `/plan`, `/robot_description` + `/tf` | `nav.launch.py` for the first four; the robot from `robot_state_publisher` |
 | diagnostics | `/diagnostics`, 5 Hz | `servo_node.py`: one status per servo (position, goal, error, load, current, volts, the guard's filtered temperature and the raw byte), one for the loop (rate, overruns, bus errors, torque, goal age), one for the IMU. WARN and ERROR follow the guard's own limits; the trip is published once on the way out, so the panel says why the robot sat down |
 | plots | `/joint_states` position and effort (Present Load) | `servo_node.py`, every tick |

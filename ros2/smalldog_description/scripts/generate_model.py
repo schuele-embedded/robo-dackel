@@ -198,7 +198,7 @@ base.add_box(M_BUCK, *md.buck_box())        # the XL4015 on the Pi's case top
 # 90 x 15 mm of board with the lens block on the optical axis.  It sits further forward
 # than anything else the robot carries, which is why the mass block flags it **verify**.
 base.add_box(M_CAMERA, md.camera_com(),
-             (md.CAM_LENS_H, md.CAM_BOARD[0], md.CAM_BOARD[1]))
+             (md.CAM_LENS_H, md.CAM_BOARD[1], md.CAM_BOARD[0]))
 export_stl(chassis, np.zeros(3), "base_link")
 SERVO_VIS["base_link"] = []
 for leg in LEGS:                                   # the four hip-roll servos, as they sit
