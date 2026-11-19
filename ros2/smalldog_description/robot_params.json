@@ -76,7 +76,7 @@
     ]
   },
   "l_thigh_mm": 75.0,
-  "l_shin_mm": 82.0,
+  "l_shin_mm": 55.0,
   "foot_r_mm": 13.0,
   "joint_limits_rad": {
     "roll": 1.5708,
@@ -149,9 +149,9 @@
   "joint_velocity_limit": 3.86,
   "joint_rate_ceiling_rad_s": 3.2783,
   "stance_rad": {
-    "pitch": -0.42,
-    "knee": 1.05
+    "pitch": -0.5235987755982988,
+    "knee": 1.2740903539558606
   },
-  "stance_base_height_m": 0.18073992620501958,
-  "total_mass_kg": 2.3472
+  "stance_base_height_m": 0.15117635887288727,
+  "total_mass_kg": 2.3177
 }
