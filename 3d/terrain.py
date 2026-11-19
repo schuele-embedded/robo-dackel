@@ -95,7 +95,8 @@ AMP_MM     = 30.0     # +- this, before the flat pad is blended in
 WAVELEN_MM = 160.0    # longest feature; octaves go down from here
 OCTAVES    = 4
 HALF_M     = 4.0      # heightfield half-extent, so 8 x 8 m of ground
-FLAT_R_M   = 0.16     # dead-flat spawn pad: the stance footprint (+-90 x +-70 mm), no more
+FLAT_R_M   = 0.18     # dead-flat spawn pad: the stance footprint (+-137 x +-76 mm) and
+                      # the foot's own 13 mm, no more
 FADE_M     = 0.25     # ... blended out to the noise over this much more
 BASE_M     = 0.05     # solid slab carried below the lowest point
 CELL_MM    = 12.0     # heightfield resolution; keep >=10 cells per wavelength

@@ -78,7 +78,7 @@ def run(m, P, speed, seconds, settle):
     from smalldog_walker.gait import TrotGait
     d = mujoco.MjData(m)
     gait = TrotGait(P)
-    gait.body_height = 0.158
+    gait.body_height = 0.133
     act = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_ACTUATOR, n) for n in P["joint_names"]]
     for n in P["joint_names"]:
         kind = n.split("_")[1]

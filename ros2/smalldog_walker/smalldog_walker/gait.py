@@ -58,8 +58,8 @@ class TrotGait:
         self.max_step = 0.060           # m, fore/aft half-stride clamp
         self.max_step_y = 0.030         # m, lateral half-stride clamp (roll range is small)
         self.stand_smooth = 0.12
-        self.swing_height = 0.022
-        self._body_height = 0.158
+        self.swing_height = 0.012       # 75/55 mm legs: tuned over terrain seeds 7..12
+        self._body_height = 0.133       # ... with this, band 124..141 at this swing
         self.body_height = self._body_height          # runs the setter -> clamps
         # Limit against what the joint can ACTUALLY turn at, not the vendor's
         # no-load speed.  joint_velocity_limit is 3.86 rad/s (measured

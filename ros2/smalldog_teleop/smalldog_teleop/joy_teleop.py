@@ -65,7 +65,7 @@ class JoyTeleop(Node):
         p('strafe', 0.05)         # m/s at full stick, sideways
         p('turn', 0.65)           # rad/s at full stick
         p('slow', 0.6)            # of the caps without the turbo button
-        p('body_height', 0.158)
+        p('body_height', 0.133)
         p('deadband', 0.15)
         p('repeat_rate', 20.0)
         p('joy_timeout', 0.5)     # s without /joy -> stop
