@@ -6,9 +6,9 @@
   <material name="servo"><color rgba="0.12 0.12 0.14 1"/></material>
   <link name="base_link">
     <inertial>
-      <origin xyz="-0.004438 -0.000024 0.012237" rpy="0 0 0"/>
-      <mass value="1.30867"/>
-      <inertia ixx="0.00209226" ixy="0.00000516" ixz="0.00040356" iyy="0.00471066" iyz="-0.00000039" izz="0.00503530"/>
+      <origin xyz="0.000282 -0.000022 0.011515" rpy="0 0 0"/>
+      <mass value="1.42244"/>
+      <inertia ixx="0.00228864" ixy="0.00000863" ixz="0.00045309" iyy="0.00950408" iyz="-0.00000037" izz="0.00990283"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -35,8 +35,8 @@
       <geometry><mesh filename="package://smalldog_description/meshes/rr_roll_servo.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="servo"/>
     </visual>
-    <collision><origin xyz="0.0000 0.0000 0.0020" rpy="0 0 0"/><geometry><box size="0.1260 0.0920 0.0540"/></geometry></collision>
-    <collision><origin xyz="0.0000 0.0000 0.0000" rpy="0 0 0"/><geometry><box size="0.2130 0.0982 0.0307"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 0.0020" rpy="0 0 0"/><geometry><box size="0.2200 0.0920 0.0540"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 0.0000" rpy="0 0 0"/><geometry><box size="0.3070 0.0982 0.0307"/></geometry></collision>
   </link>
   <link name="fl_hip">
     <inertial>
@@ -241,7 +241,7 @@
   <joint name="fl_roll" type="revolute">
     <parent link="base_link"/>
     <child link="fl_hip"/>
-    <origin xyz="0.09000 0.03600 0.00000" rpy="0 0 0"/>
+    <origin xyz="0.13700 0.03600 0.00000" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="3.2" velocity="3.86"/>
   </joint>
@@ -262,7 +262,7 @@
   <joint name="fr_roll" type="revolute">
     <parent link="base_link"/>
     <child link="fr_hip"/>
-    <origin xyz="0.09000 -0.03600 0.00000" rpy="0 0 0"/>
+    <origin xyz="0.13700 -0.03600 0.00000" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="3.2" velocity="3.86"/>
   </joint>
@@ -283,7 +283,7 @@
   <joint name="rl_roll" type="revolute">
     <parent link="base_link"/>
     <child link="rl_hip"/>
-    <origin xyz="-0.09000 0.03600 0.00000" rpy="0 0 0"/>
+    <origin xyz="-0.13700 0.03600 0.00000" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="3.2" velocity="3.86"/>
   </joint>
@@ -304,7 +304,7 @@
   <joint name="rr_roll" type="revolute">
     <parent link="base_link"/>
     <child link="rr_hip"/>
-    <origin xyz="-0.09000 -0.03600 0.00000" rpy="0 0 0"/>
+    <origin xyz="-0.13700 -0.03600 0.00000" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="3.2" velocity="3.86"/>
   </joint>
@@ -325,7 +325,7 @@
   <link name="camera_link"/>
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/><child link="camera_link"/>
-    <origin xyz="0.0787343 0 0.0257543" rpy="0 -0.10472 0"/>
+    <origin xyz="0.125734 0 0.0257543" rpy="0 -0.10472 0"/>
   </joint>
   <link name="camera_optical_frame"/>
   <joint name="camera_optical_joint" type="fixed">

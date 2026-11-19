@@ -193,11 +193,11 @@ THRUST_HEAD_H = 0.00                  # ... and so it stands nothing proud of th
 # =====================================================================================
 # 3. robot
 # =====================================================================================
-BODY_L, BODY_W   = 126.0, 92.0
+BODY_L, BODY_W   = 220.0, 92.0
 BODY_Z0, BODY_Z1 = -25.0, 25.0
 DECK_T           = 4.0
-ROLL_X, ROLL_Y, ROLL_Z = 90.0, 36.0, 0.0
-PITCH_X, LEG_Y, PITCH_Z = 90.0, 76.0, -30.0   # pitch axis sits below the roll fork sweep
+ROLL_X, ROLL_Y, ROLL_Z = 137.0, 36.0, 0.0
+PITCH_X, LEG_Y, PITCH_Z = 137.0, 76.0, -30.0   # pitch axis sits below the roll fork sweep
 L_THIGH, L_SHIN  = 75.0, 82.0
 KNEE_Z = PITCH_Z - L_THIGH
 FOOT_Z = KNEE_Z - L_SHIN
@@ -366,17 +366,14 @@ BATT_IN_L = BMS_H + BMS_GAP + BRICK_L
 BATT_L = BATT_IN_L + BATT_CASE_T + BATT_FRONT_T    # 95.2 - the module's own outside
 BATT_W = BATT_IN_W + 2*BATT_CASE_T                 # 68.2
 BATT_H = BATT_CASE_T + BATT_IN_H + BATT_LID_T      # 46.4
-BATT_X  = 5.0                         # module centre in x.  Not the body origin and not
-                                      # the middle of the tray either: it was pushed
-                                      # forward until the rear strip was the 8.9 mm the
-                                      # ESP32 + URT-1 bay needs, with 4.3 mm at the front.
-                                      # The measured BMS then took 7.1 mm off BATT_L and
-                                      # the module shrank about this same centre, so both
-                                      # ends now have 3.55 mm more than they need.  It is
-                                      # deliberately NOT re-centred: holding x fixed walks
-                                      # the heavy brick 3.55 mm AFT, which is the CoM
-                                      # direction the module owed the robot in the first
-                                      # place (the pack sits ahead of its own BMS).
+BATT_X  = 15.0                        # module centre in x.  Forward of the body
+                                      # origin on purpose: the Orange Pi's 250 g sits at
+                                      # OPI_X = -33 on the deck (the IMU inside it is at
+                                      # the origin), and the pack at +15 puts the base
+                                      # link's centre of mass at x = +0.3 mm
+                                      # (generate_model.py prints it).  The 220 mm tray
+                                      # leaves 47 mm free in front of the module and 77
+                                      # behind it.
 BATT_Z0 = BODY_Z0 + 3.0 - BATT_SEAT   # the case's underside, sitting in its seat recess
 BATT_Z1 = BATT_Z0 + BATT_H            # ... and its top: 24.4, with 0.60 mm to the deck
                                       # (batt_clear(); it was 1.4 before the cell holder
@@ -470,10 +467,14 @@ DECK_NUT_DZ  = 6.0                    # ... its floor, below the boss top
 # through the tray's own inner face at +-60.2.
 # The mid pair still blocks the side cable channel at x = +-18; cables go around the
 # module's ends or out through the side ports, not over it - there is 0.60 mm over it.
-DECK_END_X   = BODY_L/2 - 11.0        # 52.0 - the corner pair, off the deck's end
+DECK_END_X   = BODY_L/2 - 11.0        # 99.0 - the corner pair, off the deck's end
+DECK_MID_X   = (DECK_END_X + 18.0)/2  # 58.5 - a pair halfway out, added with the long
+                                      # body: 18 -> 99 was 81 mm of deck on no screw
 DECK_SCREWS  = ((-DECK_END_X, 41.0, (0.0, -1.0, 0.0)),
+                (-DECK_MID_X, 41.0, (1.0,  0.0, 0.0)),
                 (-18.0, 41.0, (1.0,  0.0, 0.0)),
                 ( 18.0, 41.0, (1.0,  0.0, 0.0)),
+                ( DECK_MID_X, 41.0, (1.0,  0.0, 0.0)),
                 ( DECK_END_X, 41.0, (0.0, -1.0, 0.0)))
 # The deck's two stiffening lips, and the relief every deck screw needs through them.  An
 # ISO 7380 head at |y| = 41 stands 0.8 mm proud of its counterbore and reaches into the
