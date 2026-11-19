@@ -3,9 +3,19 @@
 Base: [alarin/smalldog](https://github.com/alarin/smalldog), a 12-DOF printed quadruped on 12× ST3215/STS3215 bus servos.
 This fork is the dachshund; the original geometry lives upstream and in `git log`.
 
+The robot as it is in the CAD (`3d/render.py`, printed parts and servos; the Orange Pi, the
+battery and the buck are bought parts and are not drawn):
+
+![Isometric render](renders/view_iso.png)
+
+| side | front |
+|---|---|
+| ![Side render](renders/view_side.png) | ![Front render](renders/view_front.png) |
+
+The concept sketch this started from:
+
 ![Concept sketch](dackel-robot.svg)
 
-> The sketch shows the idea, not the robot: there is no head, neck or tail in the CAD.
 > No dachshund hardware exists yet. Every number below is from the CAD and the simulation.
 > No license was visible on the upstream repo page: check before publishing a derivative.
 
@@ -19,14 +29,23 @@ This fork is the dachshund; the original geometry lives upstream and in `git log
 | shin `L_SHIN` | 82 mm | 55 mm, solid |
 | stand pose (thigh / knee) | −22° / 46° | −30° / 73° |
 | body height standing | 187 mm | 148 mm |
-| mass | 2.55 kg | 2.32 kg |
-| sensors | LiDAR, GPS, camera, IMU | camera, IMU |
+| mass | 2.55 kg | 2.36 kg |
+| sensors | LiDAR, GPS, camera at the nose, IMU | camera in the head, IMU |
+| head, neck, tail | none | printed: 22 g head, 21 g neck, 9 g tail |
 
 **Why the thigh did not shorten.** The knee servo sits inline in the thigh with its connector
 towards the hip. At 75 mm the connector-and-cable keep-out exactly clears the hip bracket's
 pitch sleeve; at 72 mm it already cuts 488 mm³ out of that sleeve's end wall and thrust lug.
 A shorter thigh needs a different knee architecture. The low stance comes from the short shin
 and a deeper crouch instead.
+
+**The head carries the camera.** The camera board is a 90 × 15 mm strip, too long to lie
+across a head, so it stands on end: the lens looks out of the forehead and the board's tail
+runs down inside the neck, which is the camera's mount. That makes the image portrait
+(52° wide, 82° tall; rotate it in software) and the neck an upright column — a neck
+leaning forward would point the lens at the floor. The lens is 252 mm off the ground. The
+snout is in the picture: bottom centre, from 21° below the horizon down, about a fifth of
+the frame.
 
 ## 2. Parts
 
@@ -38,7 +57,7 @@ and a deeper crouch instead.
 | Orange Pi 5 Pro, in its case | runs the 50 Hz runtime; the IMU is taped inside the case |
 | 3S2P 21700 pack + BMS | cased module in the middle of the tray |
 | BMI088 IMU (I2C) | required by the RL policy's observation |
-| IMX415 USB camera module | in the nose, on two deck bolts |
+| IMX415 USB camera module | in the head: on the neck's front wall, two M2 × 8 and nuts |
 | XL4015 buck 12 → 5 V | on the Pi's case top |
 | PETG/ASA filament, TPU for the feet | whole structure is printed |
 
@@ -51,7 +70,7 @@ Fastener and BOM detail: `3d/README.md`.
 | CAD (`3d/mini_dog.py`) | done: builds clean, every clearance probe green |
 | FEA (`3d/fea.py --all`) | done; weakest inter-layer SF: `cradle_front` 0.9 at the 3 g landing, `thigh_A` 1.1 at stall (both as on the original). The 220 mm tray reads 3.5 |
 | sim models | done: both exporters stand four feet down at 148 mm |
-| hand-tuned trot | done: 557 mm in 5 s flat; terrain seeds 7…12 all upright, 387…548 mm |
+| hand-tuned trot | done: 556 mm in 5 s flat; terrain seeds 7…12 all upright, 355…538 mm |
 | RL environment | adapted; `rl/checks/check_model.py` 0 FAIL |
 | **RL policy** | **not trained.** Needs a CUDA GPU: `WSL.md` / `GPU.md` |
 | hardware | nothing bought, nothing printed |
@@ -132,5 +151,7 @@ python runtime/walk.py --go 5          # walk straight for 5 s
   on two rear-leg leads under torque (`robot/README.md`).
 - **Turning.** The wheelbase grew by half; the turn rates fitted on the original
   (`robot.launch.py`, `FIT`) are unverified.
+- **The look.** The neck is only as wide as the camera board needs and the ears are short
+  flaps, raked so the head prints without support. Both can grow, for grams at the front.
 - **Navigation.** `smalldog_nav`, `cloud_to_scan` and `robot/slam` are still in the tree but
   need a LiDAR this robot does not carry.

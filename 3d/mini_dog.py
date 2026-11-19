@@ -369,14 +369,13 @@ BATT_IN_L = BMS_H + BMS_GAP + BRICK_L
 BATT_L = BATT_IN_L + BATT_CASE_T + BATT_FRONT_T    # 95.2 - the module's own outside
 BATT_W = BATT_IN_W + 2*BATT_CASE_T                 # 68.2
 BATT_H = BATT_CASE_T + BATT_IN_H + BATT_LID_T      # 46.4
-BATT_X  = 15.0                        # module centre in x.  Forward of the body
+BATT_X  = 10.0                        # module centre in x.  Forward of the body
                                       # origin on purpose: the Orange Pi's 250 g sits at
                                       # OPI_X = -33 on the deck (the IMU inside it is at
-                                      # the origin), and the pack at +15 puts the base
-                                      # link's centre of mass at x = +0.3 mm
-                                      # (generate_model.py prints it).  The 220 mm tray
-                                      # leaves 47 mm free in front of the module and 77
-                                      # behind it.
+                                      # the origin) and the pack balances it, less what
+                                      # the neck and head add up front: the base link's
+                                      # centre of mass comes out at the hip centre
+                                      # (generate_model.py prints it).
 BATT_Z0 = BODY_Z0 + 3.0 - BATT_SEAT   # the case's underside, sitting in its seat recess
 BATT_Z1 = BATT_Z0 + BATT_H            # ... and its top: 24.4, with 0.60 mm to the deck
                                       # (batt_clear(); it was 1.4 before the cell holder
@@ -526,7 +525,7 @@ CRADLE_X      = BODY_L/2              # 110.0 - the joint plane, the tray's end 
 CRADLE_T      = 4.0                   # flange depth: 110..114 = (ROLL_X-21.9) - FORK_GAP,
                                       # i.e. ROLL_X - BODY_L/2 has to stay 27
 CRADLE_Y1     = ROLL_Y + 13.11        # 49.11 - flange half width (the old root gusset's)
-CRADLE_Z1     = S_W/2 + SLEEVE_W      # 15.36 - ... and half height.  CAM_LEDGE is this.
+CRADLE_Z1     = S_W/2 + SLEEVE_W      # 15.36 - ... and half height.
 CRADLE_RIB    = 6.0                   # the flange is a FRAME: rib width round the opening.
                                       # The opening is what lets the connector panel out -
                                       # see the panel block below, which is laid out
@@ -766,17 +765,15 @@ IMU_WINDOW   = (-34.0, -12.0)         # the deck's cable window, x - the harness
 IMU_Z0       = BODY_Z1 + DECK_T + OPI_STAND_H + OPI_CASE_FLOOR + IMU_TAPE + IMU_BOARD[2]
                                       # the PCB's TOP face, at 40.4: taped to the plate.
                                       # The package is on it - imu_xyz() is this plane.
-# The camera mount's two deck bolts.  They were the LiDAR bracket's front pair, shared
-# with it; the bracket is gone (no LiDAR, no GPS on this robot) and they are the mount's
-# own now: an M3 x 12 flat head from under the deck, through the mount's tab, into a nut
-# and washer on the tab's top.  Flat heads for the reason the Orange Pi's are - nothing
-# may stand proud under the deck.  Off the torque path: the tabs hold a 4 g board.
-# 9 mm in from the deck's end keeps the head's seat off the deck slot at BODY_L/2 - 5.
-CAM_BOLT     = (BODY_L/2 - 9.0, 16.0) # (x, |y|) on the deck
-CAM_BOLT_L   = 12.0                   # M3 x 12, cam_bolt_check()
-CAM_HEAD_R   = 3.1                    # ISO 10642 M3 flat head: @6.0 max, in a @6.2 bore
-CAM_SEAT_D   = 0.3                    # the head's flat face, up from the deck's underside
-CAM_SEAT_H   = CAM_HEAD_R - M3_CLR    # ... the 90 deg seat's height, 1.4
+# Bolts that hold a part DOWN ON THE DECK - the neck's four and the tail's two.  An M3 x 12
+# flat head from under the deck, through the part's foot, into a nut on the foot's top.
+# Flat heads for the reason the Orange Pi's are - nothing may stand proud under the deck.
+# Off the torque path: a 25 g head and a 10 g tail.
+DECK_FLAT_L  = 12.0                   # M3 x 12, deck_flat_check()
+DECK_FLAT_R  = 3.1                    # ISO 10642 M3 flat head: @6.0 max, in a @6.2 bore
+DECK_FLAT_D  = 0.3                    # the head's flat face, up from the deck's underside
+DECK_FLAT_H  = DECK_FLAT_R - M3_CLR   # ... the 90 deg seat's height, 1.4
+DECK_FOOT_T  = 3.0                    # the foot plate those bolts clamp
 
 # The 12 -> 5 V buck (XL4015, ref/power/README.md) rides on the Orange Pi's case top on
 # foam tape, beside the board it feeds: the tray's side strips are 8.4 deep and the
@@ -804,100 +801,87 @@ CAM_LENS_D, CAM_LENS_H = 14.0, 16.2   # M12 holder OD, and its stand-off from th
 CAM_LENS_U = 70.59                    # optical axis, from the connector end of the board
 CAM_EAR_P, CAM_EAR_D = 18.0, 2.2      # the two mounting holes straddling the lens
 CAM_CONN   = (12.0, 5.2)              # USB tail connector: along the board, and its height
-CAM_TAIL   = -1.0                     # which way the 70.6 mm tail runs.  -1 = -y.
+CAM_TAIL   = -1.0                     # which way the 70.6 mm tail runs along the board's
+                                      # own long axis.  -1 = down the neck.
 
-# WHERE IT GOES, AND WHY THERE IS EXACTLY ONE PLACE.
-# The nose is boxed in on four sides and every one of them is a measured part, not taste:
+# WHERE IT GOES: IN THE HEAD, STANDING UP.
+# The board is 90 mm long and the lens is 19.4 mm from one end, so it cannot lie across a
+# head 46 mm wide.  It stands on end instead: the lens looks out of the forehead and the
+# 70.6 mm tail runs down inside the neck, the USB lead leaving its lower end straight
+# through the deck.  Two things follow and neither is optional:
 #
-#   floor    the hip-roll cradles.  roll_module is solid over |y| <= 14 from x = 63 out to
-#            x = 106.5 and its root gusset is solid over |y| <= 49 from x = 63 to 67.5,
-#            both topping out at CAM_LEDGE.  Nothing sits below that in front of the body.
-#   ceiling  open air.  (It was the LiDAR bracket's base plate until the bracket went.)
-#   back     the chassis front face at x = 63.
-#   front    the hip-roll fork's REAR ARM at x = ROLL_X + FORK_Y0 = 68.1.  That arm is a
-#            disc about the roll axis; over the roll ROM it sweeps everything within
-#            r = 34 of it, so 68.1 is a wall for anything near (|y| = 36, z = 0).
+#   * THE IMAGE IS PORTRAIT.  The sensor's long side is the board's, so the frame is 52 deg
+#     wide and 82 deg tall and the pipeline turns it a quarter turn.  CAM_ROLL says so to
+#     every consumer; camera_frame()'s `up` is the image's own +v, which now points -y.
+#   * THE NECK IS UPRIGHT.  The optical axis is the board's normal, so a neck leaning
+#     forward by t looks DOWN by t.  CAM_TILT = 0, the neck is a vertical column.
 #
-# So the board lives in a 5 x 15 mm slot and only the LENS goes past x = 68.1 - it may,
-# because on the centreline its closest approach to either roll axis is 36.3 mm, outside
-# the 34 the fork sweeps.  That is not a guess; the alternatives were built and measured
-# against the real solids and the real ROM:
-#
-#   landscape at z = 23, x = 68..72  hip roll clashes from +5 deg (9.5 mm3) and reaches
-#                                    224 mm3 by +90 - the 70.6 mm tail crosses the fork's
-#                                    23 < r < 34 annulus over y = -64 .. -31.
-#   under the belly, z = -20/-32/-45 the front legs sweep it at every height: thigh, shin
-#                                    and foot all clash from +30 deg of hip pitch.
-#
-# CAM_TILT is small for the same reason the board is where it is: the slot is 5 mm deep
-# fore-aft and a tilted board eats CAM_BOARD[1]*sin(t) of that.  6 deg costs 1.6 mm and
-# leaves ~1 mm of wall front and back; 15 deg does not fit at all.  What that buys, and it
-# is worth being honest about it: the lens ends up about 170 mm off the ground with a
-# 52 deg vertical FOV, so a 1.6 m face is in frame from about 2.3 m out and is still
-# >= 90 px across - enough to recognise - to about 4 m.  Closer than that the head
-# leaves the top of the frame.  **verify** - worked out for the 209 mm of the upright
-# robot and only shifted by the 39 mm the stance dropped.  More tilt would fix that and does not fit; a shorter board would.
-CAM_FRONT    = ROLL_X + FORK_Y0 - 0.1 # 115.0 - the mount's front, 0.1 inside the fork arm plane
-CAM_X, CAM_Z = CAM_FRONT - 1.2, 24.5  # 113.8 - the PCB's FRONT face, on the optical axis
-CAM_TILT     = 6.0                    # nose-up, about +y
+# What it buys: the lens is 252 mm off the ground instead of 170, and with 41 deg of
+# frame above the axis a 1.6 m face is in it from 1.55 m out.  What it costs: the snout
+# is in the picture, bottom centre, from about 21 deg below the axis down.  **verify**
+# both on the module - the FOV is the catalogue's diagonal.
+CAM_X, CAM_Z = 100.0, 104.0           # the PCB's FRONT face, on the optical axis
+CAM_TILT     = 0.0                    # nose-up, about +y
+CAM_ROLL     = 90.0                   # about the optical axis: the board stands on end
 CAM_OPT      = 12.0                   # entrance pupil, up the axis from the PCB  **verify**
 CAM_FOV_D    = 90.0                   # the fitted lens, DIAGONAL                 **verify**
 CAM_PIX      = (3840, 2160)           # the mode the pipeline runs; H and V FOV follow
 CAM_RATE     = 20.0                   # frames/s at CAM_PIX, MJPEG, auto exposure in room
                                       # light; 30 with exposure <= 10 ms (daylight).
                                       # Measured on the Pi, ref/camera/README.md.
-CAM_LEDGE    = CRADLE_Z1              # 15.36 - the front cradle's own top face, and the
-                                      # only flat surface anywhere near the camera.  It
-                                      # used to be spelled S_W/2 + SLEEVE_W a second time
-                                      # here; it is the cradle's half height, so it is
-                                      # read from there.  Note what that means now the
-                                      # cradle is a bolted part: the camera's floor and
-                                      # its two nuts are on cradle_front, not on the tray.
-# The mount is a C-section standing on that ledge.  It cannot grip the FRONT of the board's
-# lower half (0.5 mm to the fork arm) and it cannot put a nut behind the board (2.9 mm of
-# depth, an M3 nut is 5.85 across), so the board slides in endwise and is trapped: a slot
-# in the shelf below, a wall in front of its upper half, a skirt behind.
-#
-# HOW IT IS HELD, and why not by screws of its own.  It had two M3 down into nuts in the
-# cradle's flange rib at y = 23 and 29 - a @3.4 hole through a rib CRADLE_T = 4 deep, 0.3
-# mm of skin a side, and the rib was cut in two at both.  There is nowhere else: past the
-# board's end the mount is a 1.3 mm skirt round the insertion path, the rib is 4 mm deep
-# along its whole length, the bosses are full of the cradle bolts, and x 67..73.5 at
-# y > STRAP_Y is the hip bracket's.  So the mount is held on the DECK: two tabs reach
-# back over it to the mount's own two bolts (CAM_BOLT), each an M3 x 12 flat head from
-# under the deck into a nut on the tab's top.  The tabs join the
-# mount through the skirt above the deck and the roof over the pocket, which is why the
-# roof now runs on both sides of the lens relief.  Nothing closes the open +y end after
-# the board is in: a 4 g board in a CLR-fit slot, the connector's tail down its far end.
-# A stop fin on the cradle's top was tried and dropped as clutter.
-CAM_BACK, CAM_BACK_HI = CRADLE_X, CRADLE_X + 0.6   # 110.0, 110.6 - mount back plane, below /
-                                      # above the deck's top; CAM_FRONT is beside CAM_X
-CAM_END      = (31.0, -73.0)          # the channel's two ends, in y
-CAM_TAB_T    = 3.0                    # tab thickness, = the pocket's depth in the 6 mm
-                                      # disc: 3 mm of disc left over the bolt
-CAM_TAB_R    = 6.0                    # pad radius round the bracket bolt ...
-CAM_TAB_W    = 8.0                    # ... and the width of the bar back to the mount
-CAM_LENS_REL = 2.0                    # relief round the @14 holder, on radius: the mount
-                                      # must not vignette its own camera
-# ... AND THE WALL IN FRONT OF THE BOARD HAS TO BE ATTACHED TO SOMETHING.  It was not.
-# The board pocket ran the full length of the channel, which severed that wall from the
-# skirt behind it, and camera_mount came back as three bodies: the channel, plus the wall
-# in two loose pieces of 529.3 and 104.9 mm3 (x 66.37..68.00, z 25.53..31.96), split by
-# the lens relief.  PART_SOLIDS said 3 - "the channel plus its two rails", which they
-# never were - so the count check saw the number it had been told to expect and the one
-# feature that stops the board falling out forward printed as two chips of plastic.
-# TWO TIES PUT IT BACK, and they are the same idea in two places: the pocket stops where
-# the board is not.
-#   * at the FAR end the pocket now ends CLR short of the board's own end instead of 1 mm
-#     past the channel's, which leaves 2.06 mm of end wall.  That ties the long piece and
-#     it also gives the board a positive stop in y, which it did not have;
-#   * at the NEAR end the board is inserted through, so nothing may close it - the tie
-#     goes OVER the board instead.  The channel's top rises CAM_CAP above the pocket's own
-#     ceiling from the lens relief to the board's near end, which is 10.4 mm of roof clear
-#     of the tabs' skirt patches, which now carry the same roof on the -y side too.
-CAM_CAP      = 1.2                    # roof over the board pocket at the near end: three
-                                      # 0.4 mm perimeters, and it carries nothing but a
-                                      # 4 g board that must not lift out of its slot
+M2_CLR       = 1.2                    # M2 clearance, radius - the board's two @2.2 ears
+
+# THE NECK IS THE CAMERA'S MOUNT.  A U-channel standing on the deck, open to the REAR:
+# front wall, two side walls, a foot.  The board goes in from behind, flat against the
+# front wall's inner face, its lens holder out through a hole in that wall, and is held
+# by two M2 x 8 through the wall and the board's own ears into nuts on the board's back -
+# reachable because the back is open.  The lead drops down the channel behind the board
+# and through NECK_CABLE in the foot and the deck.  It prints standing up, no support.
+NECK_WALL    = 2.4                    # the front wall, in front of the board
+NECK_SIDE    = 3.0                    # a side wall
+NECK_DEPTH   = 17.6                   # side walls, back from the board's front face: the
+                                      # board, its 5.2 connector and 10 mm for the plug
+NECK_TOP     = 122.0                  # top of the walls, z: the board stands 1.4 proud
+NECK_FOOT    = ((78.0, 108.0), 25.0)  # foot plate: (x0, x1), half width
+NECK_BOLTS   = ((84.0, 19.0), (102.0, 19.0))   # (x, |y|) - four deck bolts
+NECK_CABLE   = ((86.0, 97.0), 7.0)    # the lead's hole through foot and deck: (x0, x1), |y|
+HEAD_PIN_XZ  = (92.0, 118.0)          # the M3 x 50 through head and neck, along y
+
+# THE HEAD is a 1.2 mm shell: a skull, a snout below the lens, two ears.  It slips down
+# over the neck's top and one M3 x 50 goes through both, side to side, into a nut - the
+# only fastener, above the ears.  Sections along x, lofted like the shin's:
+#   w = mm forward of the skull's back face, H tall, W wide, dz = centre above HEAD_Z,
+#   r = corner radius.  It prints standing on its back face, nose up, without support;
+#   the ears' rear edges are raked 50 deg for that.
+HEAD_X0, HEAD_Z = 74.0, 101.0         # the skull's back face, and its centre height
+HEAD_T       = 1.2                    # shell: three 0.4 perimeters
+HEAD_PROFILE = (
+    #  w      H      W     dz     r
+    ( 0.0, 36.0, 30.0,   0.0, 13.0),  # back of the skull: flat, the face it prints on
+    (10.0, 54.0, 44.0,   0.0, 17.0),
+    (22.0, 56.0, 46.0,   0.0, 18.0),  # widest: the neck comes up inside here
+    (36.0, 56.0, 46.0,   0.0, 18.0),
+    (44.0, 54.0, 42.0,   0.0, 15.0),  # forehead - the lens looks out of this face
+    (51.0, 24.0, 28.0, -19.0, 10.0),  # the stop: down to the snout in 7 mm
+    (76.0, 20.0, 23.0, -23.0,  9.0),  # ... which droops: every mm it drops is frame the
+    (98.0, 15.0, 18.0, -28.0,  7.0),  # camera gets back.  Nose
+)
+HEAD_EYE_R   = 10.0                   # the hole the lens looks through: 6 mm ahead of the
+                                      # pupil, so 45 deg of half diagonal needs r 6 + lens
+HEAD_NOSE_R  = 5.5
+HEAD_EAR     = ((86.0, 106.0), (88.0, 112.0), (108.0, 112.0), (116.0, 100.0),
+                (118.0, 82.0), (114.0, 72.0))     # one ear, (x, z); rear edge 50 deg
+HEAD_EAR_Y   = (21.5, 24.5)           # ... and its plate in |y|: 1.5 mm into the skull
+HEAD_RIB_Z   = 3.0                    # half height of the two ribs the pin runs through
+HEAD_FIT     = 0.35                   # head over neck, a side
+
+# THE TAIL is a blade in the x-z plane, 7 mm thick, on a foot at the deck's rear end.
+# (x, z, half width) along its centreline; it prints lying on its side.
+TAIL_PTS     = ((-98.0, 30.5, 6.0), (-120.0, 42.0, 5.2), (-144.0, 56.0, 4.2),
+                (-166.0, 76.0, 3.2), (-182.0, 100.0, 2.2))
+TAIL_T       = 7.0
+TAIL_FOOT    = ((-108.0, -88.0), 15.0)   # (x0, x1), half width
+TAIL_BOLTS   = ((-98.0, 9.0),)           # (x, |y|) - two deck bolts, between the WAGOs
 
 STAND_PITCH, STAND_KNEE = -30.0, 73.0
 
@@ -922,7 +906,7 @@ PRINT_FILL        = {"chassis_bottom": 0.93, "chassis_top": 0.80,
                      "shin_A":         0.92, "shin_B":        0.92,
                      "servo_gauge":    0.94, "foot":          0.45}   # foot: **verify** - an estimate for the
                                                              # 2-wall / 10 % print; slice and weigh
-# cradle_front, cradle_rear, battery_case, battery_lid, camera_mount and
+# cradle_front, cradle_rear, battery_case, battery_lid, neck, head, tail and
 # cell_holder are deliberately absent: none has been sliced
 # yet, so part_rho() gives them PRINT_FILL_MEAN.  Slice them and put the measured factor
 # in the table.  chassis_bottom's own 0.93 was measured on the part WITH the four cradles
@@ -1569,11 +1553,7 @@ def cradle(front=True):
     """One end of the robot's hip-roll cradle, as ONE printed part: two sleeves, the rail
     box back to the tray's end wall, the top and bottom straps, and the flange frame that
     bolts to it.  The rear is not this mirrored in y - that is the same part - it is this
-    mirrored in x, so the two ends are two prints, one off each.
-
-    Which is why only the FRONT carries the camera's two nuts: CAM_LEDGE is this part's
-    top face, and with front and rear already distinct there is nothing to be gained by
-    drilling the rear for a camera it does not have."""
+    mirrored in x, so the two ends are two prints, one off each."""
     s = roll_module()
     s = s.union(mirY(s))                       # the two halves, overlapping at |y| <= 2
     # ONE duct, not the two the halves bring.  Their ducts are y -11..-1 and 1..11, so
@@ -1673,8 +1653,7 @@ def chassis_bottom():
         s = s.cut(bxc(xw+PANEL_LIP_T, xw+PANEL_T+1, cy-w/2, cy+w/2, cz-h/2, cz+h/2))
         s = s.cut(bxc(xw-1, xw+PANEL_LIP_T, cy-w/2+PANEL_LIP, cy+w/2-PANEL_LIP,
                       cz-h/2+PANEL_LIP, cz+h/2-PANEL_LIP))
-    # Nothing of the camera's here: the mount is bolted to the deck (CAM_BOLT, camera
-    # block) and stands on cradle_front's top face; nothing of it touches the tray.
+    # Nothing of the camera's here: it is in the head, on the neck, on the deck.
     #
     # There are no fork-access channels here any more.  They used to cut a @6 hole
     # through this part's front corner post and through the lower half of each corner deck
@@ -1942,14 +1921,15 @@ def chassis_top():
             s = s.cut(cyl(M25_CLR, DECK_T+OPI_STAND_H+2, (p[0], p[1], z0-1)))
             s = s.cut(cyl(OPI_HEAD_R, OPI_SEAT_D+1, (p[0], p[1], z0-1)))
             s = s.cut(cone(OPI_HEAD_R, M25_CLR, OPI_SEAT_H, (p[0], p[1], z0+OPI_SEAT_D)))
-    # camera mount bolts: M3 clearance, and the flat head's seat sunk from the deck's
-    # UNDERSIDE (CAM_HEAD_R / CAM_SEAT_D), see CAM_BOLT.
-    for px, py in cam_tab_bolts():
+    # neck and tail bolts: M3 clearance, and the flat head's seat sunk from the deck's
+    # UNDERSIDE (DECK_FLAT_*).
+    for px, py in deck_flat_bolts():
         s = s.cut(cyl(M3_CLR, 20, (px, py, z0-1)))
-        s = s.cut(cyl(CAM_HEAD_R, CAM_SEAT_D+1, (px, py, z0-1)))
-        s = s.cut(cone(CAM_HEAD_R, M3_CLR, CAM_SEAT_H, (px, py, z0+CAM_SEAT_D)))
+        s = s.cut(cyl(DECK_FLAT_R, DECK_FLAT_D+1, (px, py, z0-1)))
+        s = s.cut(cone(DECK_FLAT_R, M3_CLR, DECK_FLAT_H, (px, py, z0+DECK_FLAT_D)))
+    (cx0, cx1), cy = NECK_CABLE                # the camera's lead, down out of the neck
+    s = s.cut(bxc(cx0, cx1, -cy, cy, z0-1, z1+1))
     s = s.cut(bxc(IMU_WINDOW[0], IMU_WINDOW[1], -34, 34, z0-1, z1+1))
-    s = s.cut(bxc(BODY_L/2-5, BODY_L/2-3, -26, 26, z0-1, z1+1))
     # No IMU standoffs: the board is inside the Orange Pi's case, on its plate (IMU_*).
     for y in (-BODY_W/2, BODY_W/2-DECK_LIP_W):               # stiffening lips
         s = s.union(bxc(-BODY_L/2, BODY_L/2, y, y+DECK_LIP_W, z1, z1+DECK_LIP_H))
@@ -2025,11 +2005,16 @@ def camera_frame():
 
     `origin` is the PCB's FRONT face on the optical axis - the one face the drawing
     dimensions everything from - `axis` is where the lens looks and `up` is the image's
-    own +v.  Every other camera function is written in these three vectors so that moving
-    the module is CAM_X / CAM_Z / CAM_TILT and nothing else."""
-    t = math.radians(CAM_TILT)
-    return ((CAM_X, 0.0, CAM_Z), (math.cos(t), 0.0, math.sin(t)),
-            (-math.sin(t), 0.0, math.cos(t)))
+    own +v, i.e. across the board.  CAM_ROLL turns `up` about the axis: at 90 the board
+    stands on end and `up` points -y.  Every other camera function is written in these
+    three vectors so that moving the module is CAM_X / CAM_Z / CAM_TILT / CAM_ROLL and
+    nothing else."""
+    t, r = math.radians(CAM_TILT), math.radians(CAM_ROLL)
+    n = (math.cos(t), 0.0, math.sin(t))
+    u0 = (-math.sin(t), 0.0, math.cos(t))                 # up at no roll
+    s0 = (n[1]*u0[2]-n[2]*u0[1], n[2]*u0[0]-n[0]*u0[2], n[0]*u0[1]-n[1]*u0[0])   # n x u0
+    u = tuple(math.cos(r)*a + math.sin(r)*b for a, b in zip(u0, s0))
+    return ((CAM_X, 0.0, CAM_Z), n, u)
 
 def cam_loc():
     o, n, u = camera_frame()
@@ -2037,12 +2022,13 @@ def cam_loc():
 
 def cam_box(d0, d1, y0, y1, w0, w1):
     """A box in BOARD coordinates: `d` along the optical axis (0 = the PCB's front face),
-    `w` across the board (0 = the axis, + = image up), `y` straight in robot y - the board
-    is level in y whatever the tilt, so there is nothing to transform there."""
+    `w` across the board (0 = the axis, + = image up), `y` along the board's long axis
+    (robot +z with the board on end)."""
     return W(bxc(d0, d1, y0, y1, w0, w1).val().moved(cam_loc()))
 
 def cam_span():
-    """(y0, y1) of the board: the connector end and the short end, in robot coordinates."""
+    """(y0, y1) of the board along its own long axis, from the optical axis: the
+    connector end and the short end."""
     a = CAM_TAIL*CAM_LENS_U
     b = -CAM_TAIL*(CAM_BOARD[0]-CAM_LENS_U)
     return (min(a, b), max(a, b))
@@ -2088,105 +2074,145 @@ def camera_module():
                         max(cy, cy-CAM_TAIL*CAM_CONN[0]), -Wd/2, Wd/2))
     return s
 
-def camera_mount():
-    """The channel that holds it, standing on the hip-roll gusset's own top face.
+def deck_flat_bolts():
+    """(x, y) of every flat-head bolt that holds a part down on the deck: the neck's four
+    and the tail's two.  chassis_top() drills from this list and neck() / tail() from the
+    same constants, so a hole and its foot cannot drift apart."""
+    return [(x, sy*y) for x, y in NECK_BOLTS + TAIL_BOLTS for sy in (1.0, -1.0)]
 
-    Why it is shaped like this rather than like a bracket is argued in the parameter
-    block; what the geometry does is this.  The shelf spans the ledge and carries the
-    board's lower edge in a slot.  The skirt behind the board steps back CAM_BACK ->
-    CAM_BACK_HI where it passes the deck's top.  The wall in front exists only over
-    the board's UPPER half - lower down there is 0.5 mm to the fork arm and no wall fits -
-    and it is cut away over the lens, which is what stops the mount vignetting its own
-    camera.  The board goes in from the +y end and the same two screws that hold the mount
-    down close that end.
+def deck_flat_check():
+    """A deck bolt's stack: (seat_mm, deck_mm, spare_mm).  seat is the head's face above
+    the deck's underside (>= 0 or the head stands proud, into the battery lid); deck is
+    what is left of DECK_T above the cone; spare is the thread past the nut on the foot."""
+    return (DECK_FLAT_D, DECK_T - DECK_FLAT_D - DECK_FLAT_H,
+            DECK_FLAT_L - (DECK_T - DECK_FLAT_D) - DECK_FOOT_T - M3_NUT_H)
 
-    THE FRONT WALL IS TIED AT BOTH ENDS, and until 2026-09-11 it was tied at neither:
-    the board pocket ran the full length of the part, severed the wall from the skirt, and
-    camera_mount came back as three bodies (the channel, plus the wall in two loose pieces
-    of 529.3 and 104.9 mm3).  PART_SOLIDS said 3, so the count check passed on a wall that
-    had fallen off.  The pocket now stops CLR short of the board's far end - 2.06 mm of
-    end wall, which is also the board's stop in y - and the channel's top rises CAM_CAP
-    over the pocket between the lens relief and the board's near end, where the board is
-    inserted through and nothing may close across it.  The argument, the measurements and
-    what else was tried are in the CAM_CAP block.
+def neck_box():
+    """(x0, x1, half width) of the neck's column: from the side walls' rear edge to the
+    front wall's front face, over the board plus clearance and the two side walls."""
+    hw = CAM_BOARD[1]/2 + CLR + NECK_SIDE
+    return CAM_X - NECK_DEPTH, CAM_X + NECK_WALL, hw
 
-    IT PRINTS ON ITS BACK, on the skirt: that face is the part's one big flat, and stood
-    up the right way the whole 90 mm channel is a 20 mm wall on a 4 mm foot."""
-    L, Wd, T = CAM_BOARD
-    o, n, _ = camera_frame()
-    y0, y1 = cam_span()
-    e0, e1 = min(CAM_END), max(CAM_END)
-    ct, st = math.cos(math.radians(CAM_TILT)), math.sin(math.radians(CAM_TILT))
-    top  = CAM_Z + Wd/2*ct                                        # the board's upper edge
-    bot  = CAM_Z - Wd/2*ct                                        # ... and its lower one
-    ptop = CAM_Z + (Wd/2+CLR)*ct + CLR*st          # ... and the pocket's own ceiling, at
-    deck = BODY_Z1 + DECK_T                        # its front lip: the highest the cut
-    s = bxc(CAM_BACK, CAM_FRONT, e0, e1, CAM_LEDGE, bot)          # below reaches
-    s = s.union(bxc(CAM_BACK, CAM_FRONT, e0, e1, bot, deck))      # ... and the skirt, in
-    s = s.union(bxc(CAM_BACK_HI, CAM_FRONT, e0, e1, deck, top))   # two steps past the deck
-    # ... and the roof that ties the front wall's near half back to the skirt over the
-    # board, from the lens relief to the board's own end.  See the CAM_CAP block.
-    s = s.union(bxc(CAM_BACK_HI, CAM_FRONT, CAM_LENS_D/2+CAM_LENS_REL, y1,
-                    top, ptop+CAM_CAP))
-    # the two tabs to the mount's deck bolts, and the patch of skirt + roof each one
-    # joins through: the skirt above the deck is 0.5 mm here, so the patch fills it back
-    # to the board pocket (cut below, after this) and up to the roof's top.  On the -y
-    # side that patch IS the roof over the pocket - the tie the +y side had from CAM_CAP.
+def neck():
+    """The neck, and the camera's mount - see the NECK_* block.  A U-channel open to the
+    rear on a foot plate: the board lies against the front wall's inner face, the lens
+    holder goes out through it, two M2 hold the board by its ears."""
     z0 = BODY_Z1 + DECK_T
-    for px, py in cam_tab_bolts():
-        s = s.union(cam_tab(px, py))
-        s = s.union(bxc(CAM_BACK_HI, CAM_FRONT, py-CAM_TAB_W/2, py+CAM_TAB_W/2,
-                        z0, ptop+CAM_CAP))
-        s = s.cut(cyl(M3_CLR, CAM_TAB_T+2.0, (px, py, z0-1.0)))
-    # everything in front of the board below its upper half has to go: 0.5 mm to the fork
-    s = s.cut(cam_box(-CLR, 40.0, e0-1, e1+1, -Wd, 1.0))
-    # ... and so does everything in front of the lens, all the way across the holder
-    s = s.cut(cam_box(-CLR, 40.0, -CAM_LENS_D/2-CAM_LENS_REL, CAM_LENS_D/2+CAM_LENS_REL,
-                      -Wd, Wd))
-    # the board's own pocket.  Open at the NEAR end, because that is the way the board
-    # goes in; closed CLR short of its FAR end, which is both the board's stop in y and
-    # what ties the long half of the front wall back to the skirt.
-    s = s.cut(cam_box(-T-CLR, CLR, y0-CLR, e1+1, -Wd/2-CLR, Wd/2+CLR))
-    s = s.cut(cam_box(-T-CLR-CAM_CONN[1], -T-CLR, e0-1, y0+CAM_CONN[0]+CLR,
-                      -Wd/2-CLR, Wd/2+CLR))                       # ... and its connector
+    x0, x1, hw = neck_box()
+    (fx0, fx1), fy = NECK_FOOT
+    s = bxc(fx0, fx1, -fy, fy, z0, z0+DECK_FOOT_T)
+    s = s.union(bxc(x0, x1, -hw, hw, z0, NECK_TOP))
+    # the channel: everything behind the front wall between the side walls, out the back
+    s = s.cut(bxc(x0-1.0, CAM_X, -hw+NECK_SIDE, hw-NECK_SIDE, z0+DECK_FOOT_T, NECK_TOP+1.0))
+    (cx0, cx1), cy = NECK_CABLE
+    s = s.cut(bxc(cx0, cx1, -cy, cy, z0-1.0, z0+DECK_FOOT_T+1.0))
+    o, n, _ = camera_frame()
+    s = s.cut(cyl(CAM_LENS_D/2+CLR, NECK_WALL+2.0, (CAM_X-1.0, 0.0, CAM_Z), axis=(1, 0, 0)))
+    for dz in (-CAM_EAR_P/2, CAM_EAR_P/2):                # the board's two ears
+        s = s.cut(cyl(M2_CLR, NECK_WALL+2.0, (CAM_X-1.0, 0.0, CAM_Z+dz), axis=(1, 0, 0)))
+    for x, y in NECK_BOLTS:
+        for sy in (1.0, -1.0):
+            s = s.cut(cyl(M3_CLR, DECK_FOOT_T+2.0, (x, sy*y, z0-1.0)))
+    px, pz = HEAD_PIN_XZ                                  # the pin through head and neck
+    s = s.cut(cyl(M3_CLR, 2*hw+2.0, (px, -hw-1.0, pz), axis=(0, 1, 0)))
     return s
 
-def cam_tab(px, py, grow=0.0):
-    """One tab of the camera mount, in robot coordinates: a CAM_TAB_R pad round the
-    deck bolt at (px, py), a CAM_TAB_W bar from it back to the mount, CAM_TAB_T thick
-    on the deck's top.  `grow` widens it by a clearance."""
+_HEAD_F = []
+def head_profile(w):
+    """H, W, dz and corner radius at w mm forward of the skull's back face."""
+    if not _HEAD_F:
+        ws = [q[0] for q in HEAD_PROFILE]
+        _HEAD_F.extend(mono(ws, [q[k] for q in HEAD_PROFILE]) for k in (1, 2, 3, 4))
+    return tuple(f(w) for f in _HEAD_F)
+
+def head_loft(inset=0.0):
+    """The head's outer surface, or the same sections `inset` in - built nose-up along
+    local z and stood in the robot by the frame below.
+
+    RULED, on one grid of stations for both.  A smooth loft through sections that step
+    54 -> 24 mm in 7 mm (the stop) overshoots between them, and the outer and the inner
+    surface overshoot differently: the shell came back invalid, 119 cm3 of a head that
+    should be 15, and nothing but the volume said so."""
+    w0, w1 = HEAD_PROFILE[0][0] + inset, HEAD_PROFILE[-1][0] - inset
+    grid = {q[0] for q in HEAD_PROFILE} | {i*2.0 for i in range(int(HEAD_PROFILE[-1][0]/2.0)+1)}
+    ws = sorted({w0, w1} | {w for w in grid if w0 < w < w1})
+    wires = []
+    for w in ws:
+        H, Wd, dz, r = head_profile(w)
+        wires.append(rrect(H-2*inset, Wd-2*inset, r-inset, (dz, 0.0, w)))
+    return mv(W(cq.Solid.makeLoft(wires, True)),
+              frame((HEAD_X0, 0.0, HEAD_Z), xdir=(0, 0, 1), zdir=(1, 0, 0)))
+
+def xz_plate(pts, y0, y1):
+    """A polygon given as (x, z) points, extruded from y0 to y1."""
+    return mv(tri(pts, -y1, -y0), frame((0, 0, 0), xdir=(1, 0, 0), zdir=(0, -1, 0)))
+
+def head():
+    """The head - see the HEAD_* block.  Shell, ears, the two ribs the pin runs through,
+    the eye the lens looks out of, the opening the neck comes up through."""
+    outer = head_loft()
+    s = outer.cut(head_loft(HEAD_T))
+    nose = HEAD_X0 + HEAD_PROFILE[-1][0]
+    s = s.union(cq.Workplane("XY").sphere(HEAD_NOSE_R).translate(
+        (nose, 0.0, HEAD_Z + HEAD_PROFILE[-1][3])))
+    x0, x1, hw = neck_box()
+    px, pz = HEAD_PIN_XZ
+    for sy in (1.0, -1.0):
+        e0, e1 = sorted((sy*HEAD_EAR_Y[0], sy*HEAD_EAR_Y[1]))
+        s = s.union(xz_plate(HEAD_EAR, e0, e1))
+        # the pin's rib: from the skull's back face forward past the pin, between the
+        # neck's side wall and the shell.  A wall, not a boss - it prints standing up.
+        r0, r1 = sorted((sy*(hw+HEAD_FIT), sy*40.0))
+        s = s.union(bxc(HEAD_X0+0.5, px+5.0, r0, r1, pz-HEAD_RIB_Z, pz+HEAD_RIB_Z)
+                    .intersect(outer))
+    # the neck comes up through the skull's floor - and the lens holder and the two M2
+    # heads on the neck's front wall have to pass the same opening, so it runs forward
+    # to just behind the forehead.
+    floor = HEAD_Z - 40.0
+    s = s.cut(bxc(x0-HEAD_FIT, CAM_X+CAM_LENS_H+HEAD_FIT, -hw-HEAD_FIT, hw+HEAD_FIT,
+                  floor, HEAD_Z))
+    o, n, _ = camera_frame()
+    s = s.cut(cyl(HEAD_EYE_R, 40.0, (CAM_X+CAM_OPT-2.0, 0.0, CAM_Z), axis=(1, 0, 0)))
+    s = s.cut(cyl(M3_CLR, 100.0, (px, -50.0, pz), axis=(0, 1, 0)))
+    return s
+
+def tail():
+    """The tail - see TAIL_PTS.  A tapering blade and a foot."""
     z0 = BODY_Z1 + DECK_T
-    # `grow` is lateral only: in z the stack deck / tab / disc is a clamp, no air in it
-    t = cyl(CAM_TAB_R+grow, CAM_TAB_T, (px, py, z0))
-    return t.union(bxc(px, CAM_BACK_HI+1.0, py-CAM_TAB_W/2-grow, py+CAM_TAB_W/2+grow,
-                       z0, z0+CAM_TAB_T))
-
-def cam_tab_bolts():
-    """(x, y) of the camera mount's two deck bolts.  chassis_top() drills the deck from
-    the same list, so the two cannot drift apart."""
-    return [(CAM_BOLT[0], CAM_BOLT[1]), (CAM_BOLT[0], -CAM_BOLT[1])]
-
-def cam_bolt_check():
-    """The mount's deck bolt, M3 flat from under the deck: (seat_mm, deck_mm, spare_mm).
-    seat is the head's face above the deck's underside (>= 0 or the head stands proud,
-    into the battery lid); deck is what is left of DECK_T above the cone, under the tab;
-    spare is the thread past the nut on the tab's top."""
-    return (CAM_SEAT_D, DECK_T - CAM_SEAT_D - CAM_SEAT_H,
-            CAM_BOLT_L - (DECK_T - CAM_SEAT_D) - CAM_TAB_T - M3_NUT_H)
+    up, dn = [], []
+    n = len(TAIL_PTS)
+    for i, (x, z, h) in enumerate(TAIL_PTS):
+        ax, az, _ = TAIL_PTS[max(i-1, 0)]
+        bx, bz, _ = TAIL_PTS[min(i+1, n-1)]
+        L = math.hypot(bx-ax, bz-az)
+        nx, nz = -(bz-az)/L, (bx-ax)/L                   # left normal of the centreline
+        up.append((x + nx*h, z + nz*h))
+        dn.append((x - nx*h, z - nz*h))
+    s = xz_plate(up + dn[::-1], -TAIL_T/2, TAIL_T/2)
+    (fx0, fx1), fy = TAIL_FOOT
+    s = s.union(bxc(fx0, fx1, -fy, fy, z0, z0+DECK_FOOT_T))
+    s = s.cut(bxc(fx0-100.0, fx1+100.0, -fy-1.0, fy+1.0, z0-50.0, z0))    # nothing below the deck top
+    for x, y in TAIL_BOLTS:
+        for sy in (1.0, -1.0):
+            s = s.cut(cyl(M3_CLR, DECK_FOOT_T+2.0, (x, sy*y, z0-1.0)))
+    return s
 
 def camera_clear(wp):
-    """Highest elevation, in degrees off the optical axis, at which a solid still shows up
+    """Highest elevation above the HORIZON, in degrees, at which a solid still shows up
     inside the frame - and -180 if it is out of frame altogether.
 
-    It answers the only question that
-    matters for the job: a 1.6 m face at 2.2 .. 4 m sits at +19 .. +32 deg from this lens,
-    so anything of the robot's own bodywork that reaches into that band is in the way of
-    the thing the camera is for.  Below it the robot may appear - it is a quadruped, it
-    sees its own legs - and the number says how far below."""
+    It answers the only question that matters for the job: a 1.6 m face at 1.6 .. 4 m
+    sits at +19 .. +41 deg from this lens, so anything of the robot's own bodywork that
+    reaches into that band is in the way of the thing the camera is for.  Below it the
+    robot may appear - it sees its own snout - and the number says how far below.  The
+    frame is tested in the image's own axes, so it follows CAM_ROLL."""
     (ox, oy, oz), n = camera_pose()
     _, _, u = camera_frame()
     r = (n[1]*u[2]-n[2]*u[1], n[2]*u[0]-n[0]*u[2], n[0]*u[1]-n[1]*u[0])   # image +h
     hf, vf = (math.radians(a/2.0) for a in camera_fov())
+    zw = (-n[0]*n[2], -n[1]*n[2], 1.0-n[2]*n[2])          # world up, square to the axis
+    zl = math.sqrt(sum(q*q for q in zw))
+    zw = tuple(q/zl for q in zw)
     worst = -180.0
     for v in wp.val().tessellate(0.4)[0]:
         d = (v.x-ox, v.y-oy, v.z-oz)
@@ -2196,7 +2222,7 @@ def camera_clear(wp):
         a = math.atan2(sum(q*m for q, m in zip(d, r)), f)
         e = math.atan2(sum(q*m for q, m in zip(d, u)), f)
         if abs(a) <= hf and abs(e) <= vf:
-            worst = max(worst, math.degrees(e))
+            worst = max(worst, math.degrees(math.atan2(sum(q*m for q, m in zip(d, zw)), f)))
     return worst
 
 # =====================================================================================
@@ -2409,7 +2435,7 @@ def rom_scan_all(step=ROM_STEP):
     THE ONE PLACE THE THREE SCANS ARE SPELLED OUT.  It was written twice - here and in
     export_sim.joint_rom() - and the two copies drifted: the exporter's hip_roll swung a
     bare hip_bracket() against chassis_bottom + cradle_front + servo_dummy alone, with no
-    camera_mount, no camera module, no thrust bolts and no fork screws, so
+    neck, no camera module, no thrust bolts and no fork screws, so
     --rom-step exported a wider roll joint than mini_dog.py printed.  Same class as the
     servo mass and the MJ_* constants: a number that exists twice is a number that will
     disagree with itself, so both callers come through here.
@@ -2425,7 +2451,8 @@ def rom_scan_all(step=ROM_STEP):
         "hip_roll": rom_scan(hip_bracket().union(mv(fork_screws(), ROLL_LOC)),
                              PARTS["chassis_bottom"][0]
                                              .union(PARTS["cradle_front"][0])
-                                             .union(camera_mount())
+                                             .union(neck()).union(head())
+                                             .union(mirX(tail()))
                                              .union(camera_module())
                                              .union(mv(servo_dummy(), ROLL_LOC))
                                              .union(mv(thrust_bolts(), ROLL_LOC)),
@@ -2451,7 +2478,7 @@ def rom_scan_all(step=ROM_STEP):
 # CLAUDE.md's "masses and densities live once" note exists to stop - a part missing from
 # one of them is a robot that weighs different amounts in different simulators.
 BASE_MESHES = ("chassis_bottom", "cradle_front", "cradle_rear", "chassis_top",
-               "camera_mount")
+               "neck", "head", "tail")
 BODY_PARTS = BASE_MESHES + ("battery_case", "battery_lid")
 INTERF_TOL = 1.0        # mm3 - under this it is two faces meeting, not two solids sharing
 
@@ -2720,10 +2747,8 @@ PARTS, REPORT = {}, {}
 # ONE ENTRY IS LEFT AND IT IS DELIBERATE.  Two others were here until 2026-09-11 and both
 # were DEFECTS this table permitted rather than described - chassis_top at 3 (the deck
 # plus the Orange Pi's rear standoff pair, two 383.8 mm3 bosses floating 0.2 mm off the
-# deck's edge) and camera_mount at 3 (the channel plus the front retaining wall in two
-# loose pieces of 529.3 and 104.9 mm3).  Both are geometry now: the measured hole pattern
-# puts all four standoffs on the deck, CAM_CAP and the shortened board pocket tie the
-# wall back on.  The
+# deck's edge) and the old camera mount at 3 (its channel plus the front retaining wall
+# in two loose pieces of 529.3 and 104.9 mm3).  The
 # lesson is in the number: a count check is only as good as the number a human typed, so
 # raising an entry here is a claim about the design and has to be argued like one.
 #   servo_gauge   2 - two test coupons on one plate, and this one is on purpose
@@ -2735,7 +2760,9 @@ def build():
     PARTS["cradle_front"]   = (cf, 1, "PETG/ASA, 5 walls, 40% - flange face down")
     PARTS["cradle_rear"]    = (cr, 1, "PETG/ASA, 5 walls, 40% - flange face down")
     PARTS["chassis_top"]    = (chassis_top(),    1, "PETG/ASA, 4 walls, 25%")
-    PARTS["camera_mount"]   = (camera_mount(),   1, "PETG/ASA, 4 walls, 40% - skirt down")
+    PARTS["neck"]           = (neck(),           1, "PETG/ASA, 4 walls, 30% - foot down")
+    PARTS["head"]           = (head(),           1, "PETG/ASA, 3 walls, 0% - on its back face, nose up")
+    PARTS["tail"]           = (tail(),           1, "PETG/ASA, 4 walls, 30% - on its side")
     PARTS["battery_case"]   = (battery_case(),   1, "PETG/ASA, 4 walls, 25% - open side up")
     PARTS["battery_lid"]    = (battery_lid(),    1, "PETG/ASA, 4 walls, 25% - flat")
     PARTS["cell_holder"]    = (cell_holder(),    2, "PETG/ASA, 3 walls, 30% - bores vertical, no support")
@@ -2756,7 +2783,9 @@ def assembly(hb, th, sh, ft):
     a.add(PARTS["cradle_front"][0],   name="cradle_front",   color=grey)
     a.add(PARTS["cradle_rear"][0],    name="cradle_rear",    color=grey)
     a.add(PARTS["chassis_top"][0],    name="chassis_top",    color=grey)
-    a.add(PARTS["camera_mount"][0],   name="camera_mount",   color=grey)
+    a.add(PARTS["neck"][0],           name="neck",           color=grey)
+    a.add(PARTS["head"][0],           name="head",           color=grey)
+    a.add(PARTS["tail"][0],           name="tail",           color=grey)
     a.add(PARTS["battery_case"][0],   name="battery_case",   color=dark)
     a.add(PARTS["battery_lid"][0],    name="battery_lid",    color=dark)
     a.add(cell_holders(),             name="cell_holder",    color=grey)
@@ -2796,9 +2825,9 @@ PRINT_ORIENT = {"chassis_bottom": ((1,0,0),0), "chassis_top": ((1,0,0),0),
                 "hip_bracket_B": ((0,1,0),90), "thigh_A": ((1,0,0),90),
                 "thigh_B": ((1,0,0),90), "shin_A": ((0,1,0),90), "shin_B": ((0,1,0),90),
                 "foot": ((1,0,0),180), "servo_gauge": ((1,0,0),0),
-                # on its back skirt: the one big flat.  Stood up the right way this is a
-                # 90 x 20 mm wall on a 4 mm foot.  90 + CAM_TILT lays that face on the bed.
-                "camera_mount": ((0,1,0), 90.0+CAM_TILT)}
+                # the neck stands on its foot; the head on the skull's flat back face,
+                # nose up (robot +x to the bed's +z); the tail lies on its side.
+                "neck": ((1,0,0),0), "head": ((0,1,0),-90.0), "tail": ((1,0,0),90.0)}
 
 def main():
     for d in ("step", "stl"): os.makedirs(os.path.join(OUT, d), exist_ok=True)
@@ -2968,15 +2997,15 @@ def main():
               f" (battery module out), {hgap:+.2f} mm of air to the pack")
     print(f"  buck:        {BUCK_BOX[0]:.0f}x{BUCK_BOX[1]:.0f}x{BUCK_BOX[2]:.1f} on the case"
           f" top at x {BUCK_X:.0f}, nothing over it")
-    seat, deck, spare = cam_bolt_check()
+    seat, deck, spare = deck_flat_check()
     if seat < 0.0 or deck < 2.0 or spare < 0.5:
-        print(f"  !! CAMERA BOLTS  M3 x {CAM_BOLT_L:.0f} flat: head face {seat:.1f} up from the"
+        print(f"  !! DECK BOLTS  M3 x {DECK_FLAT_L:.0f} flat: head face {seat:.1f} up from the"
               f" deck's underside, {deck:.1f} mm of deck above the seat, {spare:.1f} mm past"
               f" the nut")
     else:
-        print(f"  camera bolts: 2 x M3 x {CAM_BOLT_L:.0f} flat from under the deck, head faces"
-              f" {seat:.1f} mm up the @{2*CAM_HEAD_R:.1f} bores, {deck:.1f} mm of deck above the"
-              f" seats, {spare:.1f} mm past the nut")
+        print(f"  deck bolts:  {len(deck_flat_bolts())} x M3 x {DECK_FLAT_L:.0f} flat from under"
+              f" the deck (neck, tail), head faces {seat:.1f} mm up the @{2*DECK_FLAT_R:.1f}"
+              f" bores, {deck:.1f} mm of deck above the seats, {spare:.1f} mm past the nut")
     xr = OPI_X+OPI_HOLE_DX-OPI_HOLES[0]/2 - OPI_STAND_R
     eng, seat, boss = opi_bolt_check()
     if eng < 2.5 or seat < 0.0 or boss < 3.0:
@@ -2987,23 +3016,26 @@ def main():
         print(f"  opi bolts:   4 x M2.5 x {OPI_BOLT_L:.0f} flat from under the deck, head"
               f" faces {seat:.1f} mm up the @{2*OPI_HEAD_R:.1f} bores, {eng:.1f} mm into the"
               f" case's spacers, {boss:.1f} mm of boss above the seats")
-    cv = sum(overlap(PARTS["camera_mount"][0].val(), b.val()) for b in (opi_box(),))
+    cv = sum(overlap(PARTS[nm][0].val(), opi_box().val()) for nm in ("neck", "head", "tail"))
     if cv > INTERF_TOL or cv < 0 or xr < -BODY_L/2:
-        print(f"  !! ORANGE PI  {cv:.1f} mm3 of camera_mount inside the case, rear standoff"
+        print(f"  !! ORANGE PI  {cv:.1f} mm3 of neck / head / tail inside the case, rear standoff"
               f" foot at x {xr:.1f} on a deck ending at {-BODY_L/2:.0f}")
     else:
-        print(f"  opi clear:   case front at x {OPI_X+OPI_BOX[0]/2:.1f}, clear of the camera"
-              f" mount's tabs; rear standoff foot at x {xr:.1f},"
+        print(f"  opi clear:   case x {OPI_X-OPI_BOX[0]/2:.1f}..{OPI_X+OPI_BOX[0]/2:.1f}, clear of"
+              f" neck, head and tail; rear standoff foot at x {xr:.1f},"
               f" {xr+BODY_L/2:.1f} mm inside the deck's end")
-    # ... and the camera's own view.  A 1.6 m face at 2.2 .. 4 m is at +19 .. +32 deg
+    # ... and the camera's own view.  A 1.6 m face at 1.6 .. 4 m is at +19 .. +41 deg
     # from this lens, so anything of the robot reaching into that band is in the way of
-    # the one job the camera has.  Below it the dog may see itself - it is a quadruped.
+    # the one job the camera has.  Below it the dog may see itself - its snout, mostly.
     hf, vf = camera_fov()
     print(f"  camera:      {hf:.0f} x {vf:.0f} deg at "
-          f"{CAM_PIX[0]}x{CAM_PIX[1]}, {CAM_TILT:+.0f} deg nose-up")
+          f"{CAM_PIX[0]}x{CAM_PIX[1]}, {CAM_TILT:+.0f} deg nose-up, rolled {CAM_ROLL:.0f}"
+          f" (portrait), lens {CAM_Z - PITCH_Z + FOOT_D/2 + L_THIGH*math.cos(math.radians(STAND_PITCH)) + L_SHIN*math.cos(math.radians(STAND_PITCH+STAND_KNEE)):.0f}"
+          f" mm off the ground standing")
     for nm, wp in (("chassis_bottom", PARTS["chassis_bottom"][0]),
                    ("chassis_top", PARTS["chassis_top"][0]),
-                   ("camera_mount", PARTS["camera_mount"][0])):
+                   ("neck", PARTS["neck"][0]), ("head", PARTS["head"][0]),
+                   ("tail", PARTS["tail"][0])):
         e = camera_clear(wp)
         if e < -180.0 + 1e-6:
             print(f"  camera view: {nm:14s} out of frame")

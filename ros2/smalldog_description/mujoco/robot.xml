@@ -31,7 +31,7 @@
   <worldbody>
     <body name="base_link" pos="0 0 0.1512" childclass="mujoco">
       <freejoint name="base_freejoint"/>
-      <inertial pos="0.000282 -0.000022 0.011515" mass="1.42244" fullinertia="0.00228864 0.00950408 0.00990283 0.00000863 0.00045309 -0.00000037"/>
+      <inertial pos="0.000034 0.000031 0.014371" mass="1.46793" fullinertia="0.00263926 0.01032290 0.01036087 0.00000000 0.00008650 -0.00000116"/>
       <geom class="visual" type="mesh" mesh="base_link"/>
       <geom class="servo" type="mesh" mesh="fl_roll_servo"/>
       <geom class="servo" type="mesh" mesh="fr_roll_servo"/>
@@ -40,8 +40,8 @@
       <geom class="collision" type="box" size="0.11000 0.04600 0.02700" pos="0.00000 0.00000 0.00200"/>
       <geom class="collision" type="box" size="0.15350 0.04911 0.01536" pos="0.00000 0.00000 0.00000"/>
       <site name="imu" pos="0 0.015 0.0404" size="0.005"/>
-      <camera name="camera" pos="0.125734 0 0.0257543" quat="-0.473147 -0.525483 0.525483 0.473147" fovy="52.23" resolution="3840 2160"/>
-      <geom name="camera_body" type="cylinder" group="2" contype="0" conaffinity="0" size="0.007 0.0081" pos="0.117032 0 0.0248397" quat="0.525483 0.473147 0.473147 0.525483" rgba="0.1 0.1 0.12 1"/>
+      <camera name="camera" pos="0.112 0 0.104" quat="-2.16489e-17 -0.707107 2.16489e-17 0.707107" fovy="52.23" resolution="3840 2160"/>
+      <geom name="camera_body" type="cylinder" group="2" contype="0" conaffinity="0" size="0.007 0.0081" pos="0.10325 0 0.104" quat="2.16489e-17 0.707107 2.16489e-17 0.707107" rgba="0.1 0.1 0.12 1"/>
       <body name="fl_hip" pos="0.13700 0.03600 0.00000">
         <joint name="fl_roll" axis="1 0 0" range="-1.5408 1.5408"/>
         <inertial pos="0.000203 0.009219 -0.015260" mass="0.09005" fullinertia="0.00005179 0.00003278 0.00004057 -0.00000026 -0.00000028 0.00000064"/>

@@ -165,7 +165,7 @@ def parse():
 # in 5 s is not 1563 mm in 10 s, and a rollout at any other --seconds cannot be
 # divided into it or held against it.
 BASELINE_SECONDS = 5.0
-BASELINE_MM = {"flat": 557.1, "heightfield": 547.6}   # the 220 mm body on 75/55 legs, seed 7
+BASELINE_MM = {"flat": 556.2, "heightfield": 525.6}   # the 220 mm body on 75/55 legs, seed 7
 
 # The battery. Each is (label, vx, vy, yaw): what we ask, in the body frame.
 BATTERY = [

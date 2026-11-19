@@ -1,7 +1,8 @@
 # CLAUDE.md
 
 Parametric CAD for a 12-DOF printed quadruped built around 12 × Feetech/Waveshare ST3215
-bus servos - the dachshund: a 220 mm body on 75 / 55 mm legs. Pure code-CAD — no GUI model, no feature history outside the scripts.
+bus servos - the dachshund: a 220 mm body on 75 / 55 mm legs, with a printed head, neck
+and tail. Pure code-CAD — no GUI model, no feature history outside the scripts.
 `README.md` is the human-facing spec; read it before changing geometry.
 
 ## Environment
@@ -105,10 +106,29 @@ STL only.
   side channel it had was a sealed cavity, a pocket open to the servo bore hollows the
   boss and halves `cradle_front`'s SF, and the servo side has 3.7 mm under the strap.
   `cradle_insert_clear()` checks the bore, the lip it bottoms on and the screw's reach.
-- **The camera mount stands on the cradle and is bolted to the deck**: two tabs
-  (`cam_tab()`) on the deck's top, each on its own M3 × 12 flat head from under the deck
-  (`CAM_BOLT`, `cam_bolt_check()`), nut on the tab. Not into the cradle: its old M3s cut
-  the cradle's 4 mm flange rib in two.
+- **The neck is the camera's mount and the camera stands on end.** The board is 90 mm
+  long with the lens 19.4 mm from one end, so it cannot lie across a head: it stands
+  against the neck's front wall, lens out through it and out of the head's forehead, tail
+  down the neck, lead through `NECK_CABLE` in the deck. Two consequences are fixed:
+  `CAM_ROLL` = 90 (the image is portrait, 52° wide × 82° tall; `camera_frame()`'s `up`
+  points −y and every consumer follows it), and the neck is upright (`CAM_TILT` = 0 — the
+  axis is the board's normal, so a neck leaning forward looks at the floor).
+- **The neck opens to the REAR**: front wall, two side walls, a foot. The board goes in
+  from behind and is held by two M2 through the wall and its own ears into nuts on its
+  back. Slide-in-from-the-top does not work - the connector is as wide as the board and
+  anything that retains the board from behind is in its way.
+- **The head is a 1.2 mm ruled-loft shell** (`HEAD_PROFILE`, `head_loft()`), slipped over
+  the neck and held by one M3 × 50 and a nut through both (`HEAD_PIN_XZ`). **Ruled, on
+  one station grid for the outer and the inner surface**: a smooth loft overshoots at the
+  stop (54 → 24 mm in 7 mm), differently for each, and the shell came back invalid and
+  solid - 119 cm³ where 15 belong. The snout droops because every mm it drops is frame the
+  camera gets back (`camera view: head` in the build).
+- **Neck and tail stand on the deck on flat-head M3 from underneath** (`deck_flat_bolts()`,
+  `DECK_FLAT_*`, `deck_flat_check()`), nut on the foot. One list drills the deck and both
+  feet.
+- **Above z = 60 and inside |y| = 30 nothing of a leg ever comes**, at any roll: that is
+  where the head is. Neck, head and the tail (mirrored forward) are in the `hip_roll`
+  scan's static set, which is what says so.
 - **Off the torque path a screw may thread into plastic** (lids, covers): hole
   `M3_TAP`/`M25_TAP` (⌀2.6/⌀2.1, radii like the `_CLR` pair, both **UNVERIFIED** — print a
   coupon first), ≥ 1 D of wall, 2 D engaged, one-assembly thread. Unsure whether a load
@@ -130,7 +150,7 @@ STL only.
   0.1 mm of slop at the flange is 0.5 mm at the ground. Nut bosses run to `CRADLE_BOSS_X`,
   legal only because past the flange the fork's arm disc is the only thing there.
   `STRAP_Y` is a hard ROM limit: full-width straps read `hip_roll +0 .. +0`.
-- **`cradle_front` is the weakest printed part** (inter-layer SF **1.54** at `land3g` on
+- **`cradle_front` is the weakest printed part** (inter-layer SF **1.51** at `land3g` on
   `--orient`; the crude `SF xy / z` column says 0.9 because it assumes the worst stress
   orientation — read `--orient` for this part). It is structural: the leg's load funnels
   back to the flange through a section capped at `STRAP_Y`, and the fork sweeps the space
@@ -139,12 +159,9 @@ STL only.
   direction) on purpose: the only orientation with the servo bores vertical. Its stall case
   is a real couple (`couple=` in `part_specs()`) — a lever force about an axis concentric
   with the load patch divides by zero.
-- **The camera slot at the nose is three measured walls, all of them other parts**: floor
-  `CAM_LEDGE` = `CRADLE_Z1` (on `cradle_front`), back the chassis front face
-  (`CRADLE_X`), front the roll fork's rear arm at `ROLL_X + FORK_Y0`, a disc sweeping
-  r ≤ 34. Only the lens passes it. ~1 mm front and back: the fix for a clash is in the
-  camera block, not in a part function. The slot follows the body - `CAM_*` are derived
-  from `CRADLE_X` and `ROLL_X`, and `ROLL_X − BODY_L/2` must stay 27 (`CRADLE_T`).
+- **`ROLL_X − BODY_L/2` must stay 27**: it is the cradle flange's depth (`CRADLE_T`)
+  plus the fork's rear arm and its gap, and the frame opening and the driver relief are
+  cut `CRADLE_T` deep.
 - **The battery is a module** (`cell_holder` ×2 combs → welded brick → heatshrink →
   `battery_case` + `battery_lid`, BMS inside), dropped into the tray as one payload. Not
   structure — its lid screws are the one place a screw threads into plastic. The
@@ -176,15 +193,15 @@ STL only.
   the spine web. The shin's fork has none (`ties=False`): nothing crosses the knee.
   `README.md`, "Cables".
 - **The power node is two WAGO 221-415 in the rear strip** (`NODE_*`, `node_clear()`),
-  and the strip holds exactly that: 17.6 mm deep, 14.8 behind the seats, against a
-  lever nut's 18.6 along the wire. The bus adapter and the fuse holder still have no
+  glued to the rear cradle seats; the tail's two deck bolts come down between them. The
+  bus adapter and the fuse holder still have no
   keep-out (`POWER.md`, "What it costs the CAD").
 - **The buck rides on the Pi's case top** (`BUCK_*`, placed from `OPI_X`), nothing over
   it. Its 18 g came out of `ELECTRONICS_KG`'s allowance. Set on the bench and varnished
   before it goes on — nothing on it is adjusted in place (`ref/power/README.md`).
 - **The masses are placed, not left where they fell**: Orange Pi at `OPI_X` = −33 (the IMU
-  inside it at the body origin), battery module at `BATT_X` = +15, base link CoM at
-  x = +0.3 mm. `generate_model.py` prints it; move one, read the other.
+  inside it at the body origin), battery module at `BATT_X` = +10 against the neck and head up front, base link CoM at
+  x = 0.0 mm. `generate_model.py` prints it; move one, read the other.
 
 **Checks, and why each exists.** The recurring lesson: `isValid()`, `interference()` (static
 body parts only) and `rom_scan` (moving parts only) are each blind to a class of defect.
@@ -208,7 +225,7 @@ body parts only) and `rom_scan` (moving parts only) are each blind to a class of
   the screws ended up in open air. `README.md`, "Reaching the fork screws".
 - **Payload gaps get their own probe**: `imu_clear()`, `batt_clear()`, `holder_clear()`,
   `module_clear()`, `panel_clear()`, `camera_clear()`, and in `main()` the Pi case
-  (`opi_box()`) against `camera_mount` and its rear standoffs against the deck's end. Every `!! …` line the build prints is a failure like `!! INTERFERENCE`.
+  (`opi_box()`) against neck, head and tail and its rear standoffs against the deck's end. Every `!! …` line the build prints is a failure like `!! INTERFERENCE`.
 - **OCC booleans on the shin lofts fail silently**: a tool crossing a lofted spline end cap
   returns the input unchanged, `isValid()` True, and every later boolean fails the same
   way. Hence the profile interpolation is monotone, and a cavity (if `SHIN_CAV` ever
@@ -252,18 +269,18 @@ disagree. A "cosmetic" parameter still moves the moment arms `fea.py` derives.
 7. `rom_scan(..., step=2)` before committing to real joint limits; `export_sim.py
    --rom-step 2` re-scans.
 
-### Current baseline (2.318 kg; the no-GPU WSL2 box, MuJoCo 3.12.0)
+### Current baseline (2.363 kg; the no-GPU WSL2 box, MuJoCo 3.12.0)
 
 Inter-layer SF per load case. `stall` scales with `SERVO_STALL_NM` only, the three ground
 columns with `fea.robot_mass()`. Read `--orient` for `thigh_A` and `cradle_front`.
 
 | | stand4 | stand2 | land3g | stall | `--orient` |
 |---|---|---|---|---|---|
-| `hip_bracket_A` | 47.6 | 23.8 | 7.9 | 2.1 | 7.78 |
-| `thigh_A` | 15.4 | 7.7 | 2.6 | 1.1 | 2.81 |
-| `shin_A` | 58.0 | 29.0 | 9.7 | 4.8 | 10.35 |
-| `cradle_front` | 5.3 | 2.6 | 0.9 | 2.9 | **1.54** |
-| `chassis_bottom` | 20.9 | 10.5 | 3.5 | — | 6.73 |
+| `hip_bracket_A` | 46.7 | 23.4 | 7.8 | 2.1 | 7.78 |
+| `thigh_A` | 15.1 | 7.5 | 2.5 | 1.1 | 2.81 |
+| `shin_A` | 56.8 | 28.4 | 9.5 | 4.8 | 10.35 |
+| `cradle_front` | 5.2 | 2.6 | 0.9 | 2.9 | **1.51** |
+| `chassis_bottom` | 20.2 | 10.1 | 3.4 | — | 6.59 |
 
 (`--orient` is the `<- current` row. `chassis_bottom` has no stall case and runs at a 3 mm
 mesh: `part_specs()` says why. `thigh_A`'s ground columns are lower than the upright
@@ -279,18 +296,19 @@ that torque before the first print of either. The runtime's `duty_cap` (600 ≈ 
 the stop-gap, not a fix for the part.
 
 `export_sim.py --check`: `4 feet down, upright +1.00`, base z 148 mm, camera axis
-(+0.99 0 +0.10), ROM ±90 / ±90 / ±110 (±90 is the scan window, not a stop). Probes:
+(+1.00 0 0), 20.0 % of its frame the robot (the snout), ROM ±90 / ±90 / ±110 (±90 is the scan window, not a stop). Probes:
 `imu clear +1.20`, `batt clear +0.60`, `clamp clear +1.43`, `head clear +0.65`,
-`cradle bolts +42.15` (to the pack), `cradle inserts` to x 111.5, `fork access: all six
+`cradle bolts +47.15` (to the pack), `cradle inserts` to x 111.5, `fork access: all six
 arms`, `panel clear` (bus and low windows at both ends, XT30 clear of body and servos),
-`node clear` (two 221-415 at x −104.4..−96.1), `camera bolts` (M3 × 12 flat, 2.3 mm of
+`node clear` (two 221-415 at x −104.4..−96.1), `deck bolts` (6 × M3 × 12 flat, 2.3 mm of
 deck above the seats, 2.6 mm past the nut), `opi bolts` (M2.5 × 11 flat, 2.5 mm into the
 case's spacers), `opi clear` (rear standoff foot 48.7 mm inside the deck's end),
-`camera view: out of frame` for all three.
+`camera view: head up to -21.4 deg, below the face band`, the other four out of frame;
+lens 252 mm off the ground standing.
 
-Step 6, gait defaults (swing 12 mm, body 133 mm): **flat trot 557.1 mm**; **terrain seeds
-7…12: 548 / 530 / 464 / 387 / 444 / 543 mm, 0/6 down**; **course seeds 7/8/9: 4/7 at
-2468 mm, 0/7 at 1046 mm, 0/7 at 949 mm, all upright** — on 8 and 9 the 12 mm swing stalls
+Step 6, gait defaults (swing 12 mm, body 133 mm): **flat trot 556.2 mm**; **terrain seeds
+7…12: 526 / 529 / 453 / 373 / 355 / 538 mm, 0/6 down**; **course seeds 7/8/9: 4/7 at
+2322 mm, 0/7 at 1048 mm, 0/7 at 1043 mm, all upright** — on 8 and 9 the 12 mm swing stalls
 at the first log (14 mm) instead of falling over it. `ros2/smalldog_walker` tests: 11
 passed.
 
@@ -301,7 +319,9 @@ passed.
   reproduce it exactly.
 - **Compare against this machine only.** The same model reads a few mm differently on the
   mac, and MuJoCo 4.x puts it on its back on the terrain.
-- **Read the terrain arm over seeds 7…12 or not at all**; one seed spans 387…548 here.
+- **Read the terrain arm over seeds 7…12 or not at all**; one seed spans 355…538 here.
+  The head, neck and tail (51 g, CoM re-centred) moved the flat trot 0.9 mm and the seed
+  mean from 486 to 462.
 - **The course is a report, not a pass/fail**, read over seeds 7/8/9.
 - **Mass sensitivity is not yet measured on this body.** The short-bodied robot's trot was
   chaotic in the gram (11 g anywhere: 778 → 597 mm; 7 g of dead mass put a terrain seed on

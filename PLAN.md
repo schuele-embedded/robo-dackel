@@ -95,7 +95,7 @@ so `--rough` is the arm that can. Choose a shape with coupons on a tilt plate, n
 Nothing blocks it but a machine: MJX needs a CUDA GPU (`WSL.md`, `GPU.md`). From scratch —
 the action is an offset from the stand pose, which moved, so the old policy was removed
 rather than fine-tuned. `python train_ppo.py`, then `eval.py --seconds 5` against the IK
-trot (557.1 mm flat, 547.6 mm on the heightfield), then `export_onnx.py` into `rl/policy/`
+trot (556.2 mm flat, 525.6 mm on the heightfield), then `export_onnx.py` into `rl/policy/`
 and commit it.
 
 Look at these after the first run, not before: the command ranges and `ACTION_SCALE` in
@@ -134,7 +134,8 @@ Step 5's traction runs belong here too: they need the robot on a floor.
 
 ## 9. If it should see
 
-The camera is on the robot and nothing uses it yet. A LiDAR would need a mount designed
+The camera is in the head, looking out of the forehead in portrait, and nothing uses it
+yet. A LiDAR would need a mount designed
 for the long deck — the old bracket's positions were tied to the 126 mm body.
 
 ---

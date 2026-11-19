@@ -6,9 +6,9 @@
   <material name="servo"><color rgba="0.12 0.12 0.14 1"/></material>
   <link name="base_link">
     <inertial>
-      <origin xyz="0.000282 -0.000022 0.011515" rpy="0 0 0"/>
-      <mass value="1.42244"/>
-      <inertia ixx="0.00228864" ixy="0.00000863" ixz="0.00045309" iyy="0.00950408" iyz="-0.00000037" izz="0.00990283"/>
+      <origin xyz="0.000034 0.000031 0.014371" rpy="0 0 0"/>
+      <mass value="1.46793"/>
+      <inertia ixx="0.00263926" ixy="0.00000000" ixz="0.00008650" iyy="0.01032290" iyz="-0.00000116" izz="0.01036087"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -325,7 +325,7 @@
   <link name="camera_link"/>
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/><child link="camera_link"/>
-    <origin xyz="0.125734 0 0.0257543" rpy="0 -0.10472 0"/>
+    <origin xyz="0.112 0 0.104" rpy="1.5708 -0 0"/>
   </joint>
   <link name="camera_optical_frame"/>
   <joint name="camera_optical_joint" type="fixed">
