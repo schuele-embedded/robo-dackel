@@ -470,10 +470,11 @@ DECK_NUT_DZ  = 6.0                    # ... its floor, below the boss top
 # through the tray's own inner face at +-60.2.
 # The mid pair still blocks the side cable channel at x = +-18; cables go around the
 # module's ends or out through the side ports, not over it - there is 0.60 mm over it.
-DECK_SCREWS  = ((-52.0, 41.0, (0.0, -1.0, 0.0)),
+DECK_END_X   = BODY_L/2 - 11.0        # 52.0 - the corner pair, off the deck's end
+DECK_SCREWS  = ((-DECK_END_X, 41.0, (0.0, -1.0, 0.0)),
                 (-18.0, 41.0, (1.0,  0.0, 0.0)),
                 ( 18.0, 41.0, (1.0,  0.0, 0.0)),
-                ( 52.0, 41.0, (0.0, -1.0, 0.0)))
+                ( DECK_END_X, 41.0, (0.0, -1.0, 0.0)))
 # The deck's two stiffening lips, and the relief every deck screw needs through them.  An
 # ISO 7380 head at |y| = 41 stands 0.8 mm proud of its counterbore and reaches into the
 # lip, so chassis_top notches DECK_LIP_NOTCH out of it at all eight screws.
@@ -547,7 +548,7 @@ CRADLE_BOSS   = 10.0                  # nut boss, square in y and z.  y 12..22 k
                                       # 1 mm off the camera's foot at y = 23 and 1 mm off
                                       # the bus window at y = 11; its nearest corner is
                                       # r = 14.1 from the roll axis against ARM_R = 13.5.
-CRADLE_BOSS_X = 71.5                  # ... and how far out it runs (servo case at 72.5)
+CRADLE_BOSS_X = ROLL_X - S_H/2 - 1.0  # 71.5 - how far out it runs (servo case at 72.5)
 # The cradle screws land in HEAT-SET INSERTS, the one place on the robot they do.  Not a
 # nut: the side channel the nut had was a sealed cavity (into the rail box), and a pocket
 # open to the servo bore hollows the boss and halves the cradle's SF, see CRADLE_BOLT.
@@ -1094,7 +1095,8 @@ CAM_TAIL   = -1.0                     # which way the 70.6 mm tail runs.  -1 = -
 # vertical FOV, so a 1.6 m face is in frame from 2.2 m out and is still >= 90 px across -
 # enough to recognise - to about 4 m.  Closer than 2.2 m the head leaves the top of the
 # frame.  More tilt would fix that and does not fit; a shorter board would.
-CAM_X, CAM_Z = 66.8, 24.5             # the PCB's FRONT face, on the optical axis
+CAM_FRONT    = ROLL_X + FORK_Y0 - 0.1 # 68.0 - the mount's front, 0.1 inside the fork arm plane
+CAM_X, CAM_Z = CAM_FRONT - 1.2, 24.5  # 66.8 - the PCB's FRONT face, on the optical axis
 CAM_TILT     = 6.0                    # nose-up, about +y
 CAM_OPT      = 12.0                   # entrance pupil, up the axis from the PCB  **verify**
 CAM_FOV_D    = 90.0                   # the fitted lens, DIAGONAL                 **verify**
@@ -1127,8 +1129,8 @@ CAM_LEDGE    = CRADLE_Z1              # 15.36 - the front cradle's own top face,
 # roof now runs on both sides of the lens relief.  Nothing closes the open +y end after
 # the board is in: a 4 g board in a CLR-fit slot, the connector's tail down its far end.
 # A stop fin on the cradle's top was tried and dropped as clutter.
-CAM_BACK, CAM_BACK_HI = 63.0, 63.6    # mount back plane, below / above the deck's top
-CAM_FRONT    = 68.0                   # ... and its front, 0.1 inside the fork arm plane
+CAM_BACK, CAM_BACK_HI = CRADLE_X, CRADLE_X + 0.6   # 63.0, 63.6 - mount back plane, below /
+                                      # above the deck's top; CAM_FRONT is beside CAM_X
 CAM_END      = (31.0, -73.0)          # the channel's two ends, in y
 CAM_TAB_T    = 3.0                    # tab thickness, = the pocket's depth in the 6 mm
                                       # disc: 3 mm of disc left over the bolt
@@ -2220,7 +2222,7 @@ def chassis_top():
         s = s.cut(cone(LIDAR_HEAD_R, M3_CLR, LIDAR_SEAT_H, (p[0], p[1], z0+LIDAR_SEAT_D)))
     s = s.cut(cyl(LIDAR_CORE_R, 20, (LIDAR_X, 0, z0-1)))   # the LiDAR cable, into the tray
     s = s.cut(bxc(IMU_WINDOW[0], IMU_WINDOW[1], -34, 34, z0-1, z1+1))
-    s = s.cut(bxc(58, 60, -26, 26, z0-1, z1+1))
+    s = s.cut(bxc(BODY_L/2-5, BODY_L/2-3, -26, 26, z0-1, z1+1))
     # No IMU standoffs: the board is inside the Orange Pi's case, on its plate (IMU_*).
     for y in (-BODY_W/2, BODY_W/2-DECK_LIP_W):               # stiffening lips
         s = s.union(bxc(-BODY_L/2, BODY_L/2, y, y+DECK_LIP_W, z1, z1+DECK_LIP_H))
