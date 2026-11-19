@@ -31,7 +31,7 @@
   <worldbody>
     <body name="base_link" pos="0 0 0.1807" childclass="mujoco">
       <freejoint name="base_freejoint"/>
-      <inertial pos="0.010018 -0.000020 0.027242" mass="1.61533" fullinertia="0.00395508 0.00870624 0.00742800 0.00000471 -0.00112218 -0.00000087"/>
+      <inertial pos="-0.004438 -0.000024 0.012237" mass="1.30867" fullinertia="0.00209226 0.00471066 0.00503530 0.00000516 0.00040356 -0.00000039"/>
       <geom class="visual" type="mesh" mesh="base_link"/>
       <geom class="servo" type="mesh" mesh="fl_roll_servo"/>
       <geom class="servo" type="mesh" mesh="fr_roll_servo"/>
@@ -40,12 +40,8 @@
       <geom class="collision" type="box" size="0.06300 0.04600 0.02700" pos="0.00000 0.00000 0.00200"/>
       <geom class="collision" type="box" size="0.10650 0.04911 0.01536" pos="0.00000 0.00000 0.00000"/>
       <site name="imu" pos="0 0.015 0.0404" size="0.005"/>
-      <site name="lidar" pos="0.1075 0 0.095" quat="0.707107 0 0.707107 0" size="0.004" rgba="0.9 0.4 0.1 1"/>
-      <geom name="lidar_body" type="cylinder" group="2" contype="0" conaffinity="0" size="0.0375 0.0325" pos="0.0955 0 0.095" quat="0.707107 0 0.707107 0" rgba="0.15 0.15 0.17 1"/>
       <camera name="camera" pos="0.0787343 0 0.0257543" quat="-0.473147 -0.525483 0.525483 0.473147" fovy="52.23" resolution="3840 2160"/>
       <geom name="camera_body" type="cylinder" group="2" contype="0" conaffinity="0" size="0.007 0.0081" pos="0.0700322 0 0.0248397" quat="0.525483 0.473147 0.473147 0.525483" rgba="0.1 0.1 0.12 1"/>
-      <site name="gps" pos="-0.05200 0.00000 0.10420" size="0.004" rgba="0.2 0.8 0.4 1"/>
-      <geom name="gps_body" class="visual" type="box" size="0.01800 0.01300 0.00605" pos="-0.05200 0.00000 0.10265" rgba="0.15 0.15 0.17 1"/>
       <body name="fl_hip" pos="0.09000 0.03600 0.00000">
         <joint name="fl_roll" axis="1 0 0" range="-1.5408 1.5408"/>
         <inertial pos="0.000203 0.009219 -0.015260" mass="0.09005" fullinertia="0.00005179 0.00003278 0.00004057 -0.00000026 -0.00000028 0.00000064"/>
@@ -159,13 +155,4 @@
     <touch name="rl_contact" site="rl_foot_site"/>
     <touch name="rr_contact" site="rr_foot_site"/>
   </sensor>
-  <custom>
-    <numeric name="lidar_cone" data="1.67552"/>
-    <numeric name="lidar_rate" data="62340"/>
-    <numeric name="lidar_range" data="0.05 30"/>
-    <numeric name="lidar_sigma" data="0.02"/>
-    <numeric name="lidar_spin" data="215.7 4.354"/>
-    <numeric name="lidar_frame_hz" data="12"/>
-    <numeric name="lidar_groups" data="1 1 0 1 1 1"/>
-  </custom>
 </mujoco>

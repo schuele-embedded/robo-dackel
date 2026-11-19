@@ -28,7 +28,6 @@ sys.path.insert(0, CAD)
 import cadquery as cq
 import mini_dog as md
 import terrain as terrain_gen
-import lidar as lidar_gen
 import camera as camera_gen
 
 MESHES = os.path.join(PKG, "meshes")
@@ -63,8 +62,6 @@ M_SERVO   = md.SERVO_KG           # kg
 M_BATTERY = md.BATTERY_KG
 M_ELECTR  = md.ELECTRONICS_KG
 M_BMS     = md.BMS_KG
-M_LIDAR   = md.LIDAR_KG
-M_GPS     = md.GPS_KG
 M_CAMERA  = md.CAMERA_KG
 M_IMU     = md.IMU_KG
 M_BUCK    = md.BUCK_KG
@@ -193,17 +190,10 @@ base.add_box(M_BATTERY, md.brick_com(), (R.BRICK_L, R.BRICK_W, R.BRICK_H))
 base.add_box(M_BMS,     md.bms_com(),   (R.BMS_H, R.BMS_L, R.BMS_W))
 # the Orange Pi stack, on the envelope mini_dog holds for it (md.OPI_BOX, md.opi_com()).
 # It used to be a local 100 x 62 x 18 here against a 92 x 62 x 20 in 3d/export_sim.py -
-# the same drift the mass block exists to stop, on the box gps_mount is now shaped around.
+# the same drift the mass block exists to stop.
 base.add_box(M_ELECTR,  md.opi_com(), md.OPI_BOX)
-# the NEO-6M and its active patch, sitting on gps_mount's platform
-base.add_box(M_GPS,     md.gps_com(), md.GPS_STACK)
 base.add_box(M_IMU, *md.imu_box())          # the BMI088 inside the Pi's case
 base.add_box(M_BUCK, *md.buck_box())        # the XL4015 on the Pi's case top
-# Unitree L2, at the pose mini_dog.py holds for it (md.lidar_com(), md.lidar_box_xyz() -
-# LIDAR_L2_BOX turned by LIDAR_TILT into robot axes; envelope and mass both off the
-# sensor's own drawing).  This used to be a 42.0 literal and a guessed 70x70x60, which is
-# exactly the divergence mini_dog's mass block exists to prevent.
-base.add_box(M_LIDAR, md.lidar_com(), md.lidar_box_xyz())
 # the IMX415 module in its channel at the nose - its own envelope off the vendor drawing,
 # 90 x 15 mm of board with the lens block on the optical axis.  It sits further forward
 # than anything else the robot carries, which is why the mass block flags it **verify**.
@@ -268,8 +258,8 @@ for k, v in links.items():
 # It is read through 3d/export_sim.py's OWN joint_rom()/limits(), not re-derived: that is
 # the function that already knows how to read bom.json and how a leg's sign flips, so the
 # two exporters cannot drift again.  The scan itself is md.rom_scan_all(), swept booleans
-# against the real solids with the fork screws, the thrust bolts, the cradle, the camera
-# and the GPS mast all in the static set - so the 90 deg roll stop is a geometric fact
+# against the real solids with the fork screws, the thrust bolts, the cradle and the
+# camera all in the static set - so the 90 deg roll stop is a geometric fact
 # about this robot, not a guess.
 #
 # WIDENING THIS WIDENS THE REAL ROBOT.  joint_soft_limits_rad below is derived from it and
@@ -454,20 +444,9 @@ def write_urdf():
                    f'    <limit lower="{jlo:.4f}" upper="{jhi:.4f}"'
                    f' effort="{J_EFF}" velocity="{J_VEL}"/>\n'
                    f'  </joint>')
-    # the L2's optical centre and its own frame - the TF a point cloud hangs off.  Pose
-    # and tilt come from lidar.py, which reads them out of mini_dog like everything else.
-    out += lidar_gen.urdf_link()
-    # ... and the camera, in BOTH conventions - see camera.py's header for why an image
+    # the camera, in BOTH conventions - see camera.py's header for why an image
     # pipeline needs camera_optical_frame and not just camera_link.
     out += camera_gen.urdf_links()
-    # ... and the GPS patch's phase centre, so a NavSatFix has a frame to name.  +Z is the
-    # patch normal, which is why gps_mount's platform is level: no rpy here is a statement.
-    _g = tuple(v * MM for v in md.gps_pose())
-    out += ['  <link name="gps_link"/>',
-            '  <joint name="gps_joint" type="fixed">\n'
-            '    <parent link="base_link"/><child link="gps_link"/>\n'
-            f'    <origin xyz="{_g[0]:.5f} {_g[1]:.5f} {_g[2]:.5f}" rpy="0 0 0"/>\n'
-            '  </joint>']
     out.append('</robot>')
     with open(os.path.join(URDF, "smalldog.urdf"), "w") as f:
         f.write("\n".join(out) + "\n")
@@ -526,16 +505,7 @@ def write_mjcf():
     # the servo mass, the MJ_* block and SERVO_STALL_NM above it.
     o += ['      <site name="imu" pos="%s" size="0.005"/>'
           % " ".join("%.6g" % (v/1000.0) for v in md.imu_xyz())]
-    o += lidar_gen.site_xml("      ")     # the L2: its frame, and the sensor drawn on it
-    o += camera_gen.camera_xml("      ")  # ... and the camera MuJoCo can actually render
-    _g = tuple(v * MM for v in md.gps_pose())        # the GPS patch, and its receiver drawn
-    _c = tuple(v * MM for v in md.gps_com())
-    _s = tuple(v * MM / 2 for v in md.GPS_STACK)
-    o += [f'      <site name="gps" pos="{_g[0]:.5f} {_g[1]:.5f} {_g[2]:.5f}" size="0.004"'
-          f' rgba="0.2 0.8 0.4 1"/>',
-          f'      <geom name="gps_body" class="visual" type="box"'
-          f' size="{_s[0]:.5f} {_s[1]:.5f} {_s[2]:.5f}"'
-          f' pos="{_c[0]:.5f} {_c[1]:.5f} {_c[2]:.5f}" rgba="0.15 0.15 0.17 1"/>']
+    o += camera_gen.camera_xml("      ")  # the camera MuJoCo can actually render
     for leg in LEGS:
         jr, jp, jk = joints_of(leg)
         o.append(f'      <body name="{leg}_hip" pos="{jr[4][0]:.5f} {jr[4][1]:.5f} {jr[4][2]:.5f}">')
@@ -574,9 +544,6 @@ def write_mjcf():
     for leg in LEGS:
         o.append(f'    <touch name="{leg}_contact" site="{leg}_foot_site"/>')
     o += ['  </sensor>']
-    # the scan parameters ride inside the model: mujoco_ros2_control is C++ and cannot
-    # import lidar.py, so the compiled mjModel is the interface.  See lidar.py's header.
-    o += lidar_gen.custom_xml("  ")
     o += ['</mujoco>']
     with open(os.path.join(MJCF, "robot.xml"), "w") as f:
         f.write("\n".join(o) + "\n")
