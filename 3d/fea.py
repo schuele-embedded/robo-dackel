@@ -236,6 +236,24 @@ def part_specs():
                            zone("y", lo=10.0), zone("z", hi=0.0))),
             note="flange bolted to the tray, roll servo reaction into the front-left bore",
         ),
+        # The tray, as a beam.  It was left out while it was 126 mm long; at 220 it is the
+        # longest span on the robot and carries the battery in the middle of it.  Clamped
+        # on the rear wall's outer face (where cradle_rear bolts on), loaded with ONE front
+        # leg's ground reaction on its own half of the front wall: bending and torsion
+        # together, which is what a diagonal pair does to the body.  Ground cases only - a
+        # servo's stall torque reaches the tray through the cradle, and that is
+        # cradle_front's case.  Two things flatter it: the reaction really acts at the
+        # foot, 27 mm ahead of the wall (+12 % of root moment), and the deck that closes
+        # the box is not in the model, which is the conservative half.
+        "chassis_bottom": dict(
+            joint="roll",
+            pose=0.0,
+            fix=zone("x", hi=-md.BODY_L / 2 + 0.5),
+            load=all_of(zone("x", lo=md.BODY_L / 2 - 0.5), zone("y", lo=0.0)),
+            cases=("stand4", "stand2", "land3g"),
+            size=3.0,       # at the default 2 mm the tray's mesh needs more than 7 GB
+            note="rear wall clamped, one front leg's ground reaction on its half of the front wall",
+        ),
     }
 
 def cases(mass_kg):
@@ -612,13 +630,17 @@ def main():
           f"\n  {'':22s} {'':21s}   peak von Mises        defl   SF xy / z")
     if a.orient:
         cn = [a.case] if a.case else ["land3g", "stall"]
-        orient_report(parts, cn, cs, a.mat, a.size, a.order)
+        for name in parts:
+            orient_report([name], [c for c in cn if c in specs[name].get("cases", cs)],
+                          cs, a.mat, max(a.size, specs[name].get("size", 0.0)), a.order)
         return
 
     for name in parts:
         print(f"\n  {name}: {specs[name]['note']}")
         for case in ([a.case] if a.case else list(cs)):
-            run_part(name, case, cs, a.mat, a.size, a.order)
+            if case in specs[name].get("cases", cs):
+                run_part(name, case, cs, a.mat, max(a.size, specs[name].get("size", 0.0)),
+                         a.order)
 
     print(f"""
   SF = strength / peak von Mises, in-plane / inter-layer.  Design to the inter-layer one
