@@ -250,19 +250,17 @@ def generate_launch_description():
                                           'the firmware\'s own protection allowed. Empty = none'),
         DeclareLaunchArgument('period', default_value='',
                               description='gait period, s; empty = the FIT point for the loop'),
-        DeclareLaunchArgument('swing', default_value='0.022',
-                              description='swing height, m. 22 mm is the sim\'s; a body rocking '
-                                          '6 deg lifts a foot 300 mm away by 30, and the swing foot '
-                                          'then drags on a gripping sole (2026-09-19)'),
-        DeclareLaunchArgument('body_height', default_value='0.158',
-                              description='body height, m (leg reach admits 150..170)'),
-        DeclareLaunchArgument('stance_x', default_value='0.02',
+        DeclareLaunchArgument('swing', default_value='0.012',
+                              description='swing height, m. 12 mm is what the sim wants for the '
+                                          '55 mm shin; **verify** on the floor - a rocking body '
+                                          'lifts a far foot by more than this'),
+        DeclareLaunchArgument('body_height', default_value='0.133',
+                              description='body height, m (leg reach admits 124..141 at this swing)'),
+        DeclareLaunchArgument('stance_x', default_value='0.0',
                               description='all four feet this far ahead of their hips, m (+ forward). '
-                                          'The CoM is ~35 mm ahead of the hip centre (kitchen scale, '
-                                          '2026-09-20: 69 % of the weight on the front feet). 20 mm '
-                                          'measured by tools/moves.sh: forward 0.23 m as at 0, back '
-                                          '0.52 (0.19 at 0), turns +49/-35; 30 mm killed the forward '
-                                          'walk (0.00 m, back 0.56). Live on /smalldog/stance_x'),
+                                          '0: the CAD puts the CoM of the base link at the hip centre. '
+                                          '**verify** on a scale - the short-bodied robot read 35 mm '
+                                          'ahead of its CAD and wanted 0.02. Live on /smalldog/stance_x'),
         DeclareLaunchArgument('level_kp', default_value='0.0',
                               description='the gait\'s attitude levelling; 0 off, the gait\'s own '
                                           'is 1.4. Off until it has been tried on the floor with '

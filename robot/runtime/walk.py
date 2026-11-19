@@ -438,9 +438,9 @@ def main():
 
     ap.add_argument("--speed", type=float, default=0.20, help="m/s for the teleop keys")
     ap.add_argument("--turn", type=float, default=1.2, help="rad/s for the teleop keys")
-    ap.add_argument("--height", type=float, default=0.158, help="body height, m")
+    ap.add_argument("--height", type=float, default=0.133, help="body height, m")
     ap.add_argument("--period", type=float, default=0.45)
-    ap.add_argument("--swing", type=float, default=0.022)
+    ap.add_argument("--swing", type=float, default=0.012)
     ap.add_argument("--max-step", type=float, default=0.060)
 
     ap.add_argument("--baseline", metavar="FILE",

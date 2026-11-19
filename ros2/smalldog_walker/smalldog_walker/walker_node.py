@@ -30,8 +30,8 @@ class SmallDogWalker(Node):
         self.declare_parameter('rate', 100.0)
         self.declare_parameter('controller', 'smalldog_controller')
         self.declare_parameter('period', 0.45)
-        self.declare_parameter('swing_height', 0.022)
-        self.declare_parameter('body_height', 0.158)
+        self.declare_parameter('swing_height', 0.012)
+        self.declare_parameter('body_height', 0.133)
         self.declare_parameter('stance_x', 0.0)      # m, feet ahead of the hips (gait.py stance_x)
         self.declare_parameter('stance_slew', 0.01)  # m/s, how fast the feet move there once standing
         # The scan guard, the last thing between Nav2 and the stairs. smalldog_nav's

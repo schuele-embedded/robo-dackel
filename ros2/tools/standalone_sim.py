@@ -131,6 +131,11 @@ def feed(gait, data, sens, blind=False):
                   contact={l: data.sensordata[a] > 1e-6
                            for l, a in sens["contact"].items() if a >= 0})
 
+def fallen_z(params):
+    """base height below which the robot counts as down: 0.6 of the nominal stance.  It
+    was a 0.10 m literal, which is 55 % of the 181 mm robot and 66 % of the 151 mm one."""
+    return 0.6 * params["stance_base_height_m"]
+
 SETTLE_DT = 1.0     # see settle(): big enough that the gait's rate limiter does not bite
 
 def settle(model, data, gait, act, seconds=1.0, sens=None, blind=False):
@@ -203,7 +208,7 @@ def headless(terrain=False, blind=False, lidar=False):
     run(model, data, gait, act, (0.0, 0.0, 1.2), 4.0, sens, blind)
     s3 = state(data)
     print(f"  turn 4s  z={s3['z']*1000:6.1f} mm  roll={s3['roll']:+5.1f} pitch={s3['pitch']:+5.1f}")
-    ok = (s2["z"] > 0.10 and abs(s2["roll"]) < 25 and abs(s2["pitch"]) < 25
+    ok = (s2["z"] > fallen_z(params) and abs(s2["roll"]) < 25 and abs(s2["pitch"]) < 25
           and (s2["x"] - s1["x"]) > 0.20)
     print("RESULT:", "OK — stands and trots forward" if ok else "FAIL")
     return 0 if ok else 1
@@ -312,6 +317,7 @@ def course(blind=False, lidar=False):
     walked around.
     """
     model, data, gait, act, params = load(True)
+    hip_x = abs(params["hip_xyz_mm"]["rl"][0]) / 1000.0   # cleared = the rear hips are past it
     sens = sensors(model)
     sc = scanner(model) if lidar else None
     nm = lambda g: mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, g) or ""
@@ -340,7 +346,7 @@ def course(blind=False, lidar=False):
                     d = f["world"][f["geom"] == g]
                     seen[nm(g)] = float(min(d[:, 0]) - s["x"])
         for n, x, half in obs:
-            if s["x"] > x + 0.09 and abs(s["y"]) < half:
+            if s["x"] > x + hip_x and abs(s["y"]) < half:
                 cleared.add(n)
         if abs(s["y"]) < 0.35:
             reach = max(reach, s["x"])
@@ -355,7 +361,7 @@ def course(blind=False, lidar=False):
             f"{label(n)} {seen[n]*1000:.0f} mm ahead" for n, _, _ in obs if n in seen)
             or "(nothing — it never got near one)"))
     print(f"  furthest x while inside the course corridor: {reach*1000:.0f} mm")
-    up = s1["z"] > 0.10 and abs(s1["roll"]) < 25 and abs(s1["pitch"]) < 25
+    up = s1["z"] > fallen_z(params) and abs(s1["roll"]) < 25 and abs(s1["pitch"]) < 25
     print(f"RESULT: {'upright' if up else 'DOWN'} at x={s1['x']*1000:.0f} mm,"
           f" y={s1['y']*1000:+.0f} mm after 25 s"
           f"  (travelled {math.hypot(s1['x']-s0['x'], s1['y']-s0['y'])*1000:.0f} mm)")

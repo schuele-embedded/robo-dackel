@@ -651,9 +651,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--speed", type=float, default=SPEED)
     ap.add_argument("--turn", type=float, default=TURN)
-    ap.add_argument("--height", type=float, default=0.158)
+    ap.add_argument("--height", type=float, default=0.133)
     ap.add_argument("--period", type=float, default=0.45)
-    ap.add_argument("--swing", type=float, default=0.022)
+    ap.add_argument("--swing", type=float, default=0.012)
     ap.add_argument("--max-step", type=float, default=0.060)
     ap.add_argument("--keep-self", action="store_true",
                     help="score the map without dropping the robot's own legs")

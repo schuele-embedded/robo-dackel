@@ -56,7 +56,7 @@ class KeyboardTeleop(Node):
         super().__init__('smalldog_keyboard_teleop')
         self.declare_parameter('speed', 0.20)
         self.declare_parameter('turn', 1.2)
-        self.declare_parameter('body_height', 0.158)
+        self.declare_parameter('body_height', 0.133)
         self.declare_parameter('repeat_rate', 50.0)
         # `~/key` of the mujoco_ros2_control node, which publishes what the viewer window
         # sees. Absolute, because that node is not a child of this one.

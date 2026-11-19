@@ -122,7 +122,7 @@ def main():
     ap.add_argument("--port", default="/dev/ttyUSB0")
     ap.add_argument("--baud", type=int, default=1_000_000)
     ap.add_argument("--out", help="write the full timestamped trace here")
-    ap.add_argument("--height", type=float, default=0.158)
+    ap.add_argument("--height", type=float, default=0.133)
     ap.add_argument("--ramp", type=float, default=2.0)
     ap.add_argument("--speak", action="store_true",
                     help="speak the cues (macOS `say`), for a run you are not watching")
@@ -134,7 +134,7 @@ def main():
     ap.add_argument("--current-a", type=float, default=Limits.current_a,
                     help="current trip, A of PRESENT_CURRENT (default %(default)s)")
     a = ap.parse_args()
-    a.speed, a.turn, a.period, a.swing, a.max_step, a.hz = 0.20, 1.2, 0.45, 0.022, 0.060, 50.0
+    a.speed, a.turn, a.period, a.swing, a.max_step, a.hz = 0.20, 1.2, 0.45, 0.012, 0.060, 50.0
 
     params = load_params()
     calib = Calibration.load(params=params)
