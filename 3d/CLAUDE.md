@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Parametric CAD for a 12-DOF printed quadruped built around 12 × Feetech/Waveshare ST3215
-bus servos. Pure code-CAD — no GUI model, no feature history outside the scripts.
+bus servos - the dachshund: a 220 mm body on 75 / 55 mm legs. Pure code-CAD — no GUI model, no feature history outside the scripts.
 `README.md` is the human-facing spec; read it before changing geometry.
 
 ## Environment
@@ -26,7 +26,8 @@ boolean interference against real solids. Do not add `--fast` paths that fake it
 | `mini_dog.py` | **the model.** All geometry, all parameters, the ROM scan, the clearance probes, the exporters. |
 | `fea.py` | linear static FEA (gmsh + sfepy). Imports `mini_dog`; derives load cases and clamp regions from its joint frames. |
 | `export_sim.py` | URDF + MJCF export. Imports `mini_dog`; every length, mass and limit is read from it. |
-| `camera.py`, `lidar.py` | the IMX415 and the Unitree L2 **as sensors**: the sites, `<camera>` and `<custom>` numerics both sim exporters emit, and the ray-cast scanner. No CAD in them. |
+| `camera.py` | the IMX415 **as a sensor**: the site and `<camera>` both sim exporters emit. No CAD in it. |
+| `lidar.py` | the Unitree L2's scan model. The robot carries no LiDAR and no exporter imports this; it reads `LIDAR_*` constants `mini_dog.py` no longer has. |
 | `terrain.py` | procedural heightfield + the ramp/wall/log course, imported by both sim exporters. |
 | `render.py` | offscreen VTK renders of `out/stl/*.stl`. |
 | `bench_rig.py`, `torque_rig.py` | printed bench fixtures. One-way consumers of `mini_dog` (sleeve, clamp, hub pattern, densities); **not robot parts** — no `PARTS` entry, no mass, no FEA or sim consumer, so steps 4–6 below do not apply. Keep the arrow one-way. |
@@ -55,11 +56,11 @@ STL only.
   README's source column.
 - **Masses, densities, the MuJoCo joint feel (`MJ_*`), the foot contact (`MJ_FOOT_*`), the
   servo's stall torque (the 2 s peak, 3.2 — the held 2.3 is a runtime budget) and no-load
-  speed, the LiDAR parameters and the IMU site all live
+  speed, the stand pose (`STAND_*`) and the IMU site all live
   once, in `mini_dog.py` sections 3–4.** `fea.py`, `export_sim.py` and the ROS 2 generator
   read them and keep no copies. Every one of these was duplicated once and diverged (servo
   mass 55 vs 60 g; rounded `J_EFF`; IMU sites 25 mm apart; joint limits narrower by 52° in
-  one exporter). `rl/checks/check_model.py` is what catches it.
+  one exporter; the stand pose −22°/46° here against −24°/60° in the ROS 2 generator). `rl/checks/check_model.py` is what catches it.
 - `MJ_DAMPING` / `MJ_FRICTIONLOSS` / `MJ_ARMATURE` / `MJ_KP` are measured on one real
   ST3215 (provenance beside each constant). `MJ_DAMPING` and `SERVO_STALL_NM` are in one
   torque calibration — the scale's — because the joint ceiling divides one by the other;
@@ -71,8 +72,23 @@ STL only.
   `MJ_FOOT_PRIORITY` = 1 makes the foot's numbers win over the floor's — MuJoCo otherwise
   takes the elementwise max of the pair. Check a contact model by reading
   `d.contact[i].friction`, never the XML.
-- The Waveshare `ROBOTIC DOG.step` supplies the shin's **shape** (`SHIN_PROFILE`) and
-  nothing else — it is a single-shear-horn aluminium design.
+- The Waveshare `ROBOTIC DOG.step` supplied the shin's **shape** and nothing else — it is
+  a single-shear-horn aluminium design. At `L_SHIN` = 55 that shape is down to fork,
+  shoulder and ankle boss.
+
+**Legs**
+
+- **`L_THIGH` = 75 is a floor, not a choice.** The knee servo sits inline in the thigh,
+  connector towards the hip, and `servo_envelope()` keeps 6 mm of plug and 14 mm of lead
+  clear behind it. At 75 that keep-out exactly clears the hip bracket's pitch sleeve; at
+  72 it cuts 488 mm³ out of the sleeve's end wall and thrust lug, at 66 1633. Nothing
+  flags it: the cut hip bracket is still one valid solid. A shorter thigh is a different
+  knee architecture.
+- **The shin is solid** (`SHIN_CAV = None`, `SHIN_TIE_U = ()`): the fork spine owns
+  u ≤ 31 whatever the length, the ankle boss is at u = `L_SHIN − FOOT_D/2` = 42, and the
+  foot bolt's bore runs up to u = 32.6 through all of the 11 mm between.
+- **The low stance is the stand pose**, `STAND_PITCH` / `STAND_KNEE` = −30° / 73°: foot
+  under the hip, base at 148 mm. Both exporters read it from here.
 
 **Structure**
 
@@ -89,9 +105,10 @@ STL only.
   side channel it had was a sealed cavity, a pocket open to the servo bore hollows the
   boss and halves `cradle_front`'s SF, and the servo side has 3.7 mm under the strap.
   `cradle_insert_clear()` checks the bore, the lip it bottoms on and the screw's reach.
-- **The camera mount has no screws**: tabs under the LiDAR pedestal's front deck bolts
-  (`cam_tab()`, one function for the tab and for the pocket `lidar_mount` cuts for it).
-  Its old M3s cut the cradle's 4 mm flange rib in two.
+- **The camera mount stands on the cradle and is bolted to the deck**: two tabs
+  (`cam_tab()`) on the deck's top, each on its own M3 × 12 flat head from under the deck
+  (`CAM_BOLT`, `cam_bolt_check()`), nut on the tab. Not into the cradle: its old M3s cut
+  the cradle's 4 mm flange rib in two.
 - **Off the torque path a screw may thread into plastic** (lids, covers): hole
   `M3_TAP`/`M25_TAP` (⌀2.6/⌀2.1, radii like the `_CLR` pair, both **UNVERIFIED** — print a
   coupon first), ≥ 1 D of wall, 2 D engaged, one-assembly thread. Unsure whether a load
@@ -110,11 +127,11 @@ STL only.
 - **The hip-roll cradles are bolted parts** (`cradle_front` / `cradle_rear`, one per end
   because the halves' rails overlap on the centreline): four M3 through `CRADLE_REG_D`
   spigots into pockets in the tray wall. The register is stiffness, not decoration —
-  0.1 mm of slop at the flange is 0.7 mm at the ground. Nut bosses run to `CRADLE_BOSS_X`,
+  0.1 mm of slop at the flange is 0.5 mm at the ground. Nut bosses run to `CRADLE_BOSS_X`,
   legal only because past the flange the fork's arm disc is the only thing there.
   `STRAP_Y` is a hard ROM limit: full-width straps read `hip_roll +0 .. +0`.
-- **`cradle_front` is the weakest printed part** (inter-layer SF **1.33** at `land3g` on
-  `--orient`; the crude `SF xy / z` column says 0.7 because it assumes the worst stress
+- **`cradle_front` is the weakest printed part** (inter-layer SF **1.54** at `land3g` on
+  `--orient`; the crude `SF xy / z` column says 0.9 because it assumes the worst stress
   orientation — read `--orient` for this part). It is structural: the leg's load funnels
   back to the flange through a section capped at `STRAP_Y`, and the fork sweeps the space
   that would widen it. Filling the neck solid, closing it with a web and thickening the
@@ -122,11 +139,12 @@ STL only.
   direction) on purpose: the only orientation with the servo bores vertical. Its stall case
   is a real couple (`couple=` in `part_specs()`) — a lever force about an axis concentric
   with the load patch divides by zero.
-- **The camera slot at the nose is four measured walls, three of them other parts**: floor
-  `CAM_LEDGE` = `CRADLE_Z1` (on `cradle_front`), ceiling the LiDAR base disc
-  (`LIDAR_BASE_FLAT`), back the chassis front face, front the roll fork's rear arm at
-  `ROLL_X + FORK_Y0`, a disc sweeping r ≤ 34. Only the lens passes it. ~1 mm everywhere:
-  the fix for a clash is in the camera block, not in a part function.
+- **The camera slot at the nose is three measured walls, all of them other parts**: floor
+  `CAM_LEDGE` = `CRADLE_Z1` (on `cradle_front`), back the chassis front face
+  (`CRADLE_X`), front the roll fork's rear arm at `ROLL_X + FORK_Y0`, a disc sweeping
+  r ≤ 34. Only the lens passes it. ~1 mm front and back: the fix for a clash is in the
+  camera block, not in a part function. The slot follows the body - `CAM_*` are derived
+  from `CRADLE_X` and `ROLL_X`, and `ROLL_X − BODY_L/2` must stay 27 (`CRADLE_T`).
 - **The battery is a module** (`cell_holder` ×2 combs → welded brick → heatshrink →
   `battery_case` + `battery_lid`, BMS inside), dropped into the tray as one payload. Not
   structure — its lid screws are the one place a screw threads into plastic. The
@@ -161,13 +179,12 @@ STL only.
   and the strip holds exactly that: 17.6 mm deep, 14.8 behind the seats, against a
   lever nut's 18.6 along the wire. The bus adapter and the fuse holder still have no
   keep-out (`POWER.md`, "What it costs the CAD").
-- **The buck rides on the Pi's case top, under the GPS platform** (`BUCK_*`,
-  `buck_clear()`): the only 17 mm of air on the robot — rear strip 14.05, side strips
-  8.4, under the case's rear overhang the rear fork sweeps. Its 18 g came out of
-  `ELECTRONICS_KG`'s allowance, so the total did not move. `GPS_LAND` derives from it:
-  the platform's underside is the buck's top plus `BUCK_AIR`, and the arms trade reach
-  for height at 45°. Set on the bench and varnished before it goes on — nothing on it is
-  adjusted in place (`ref/power/README.md`).
+- **The buck rides on the Pi's case top** (`BUCK_*`, placed from `OPI_X`), nothing over
+  it. Its 18 g came out of `ELECTRONICS_KG`'s allowance. Set on the bench and varnished
+  before it goes on — nothing on it is adjusted in place (`ref/power/README.md`).
+- **The masses are placed, not left where they fell**: Orange Pi at `OPI_X` = −33 (the IMU
+  inside it at the body origin), battery module at `BATT_X` = +15, base link CoM at
+  x = +0.3 mm. `generate_model.py` prints it; move one, read the other.
 
 **Checks, and why each exists.** The recurring lesson: `isValid()`, `interference()` (static
 body parts only) and `rom_scan` (moving parts only) are each blind to a class of defect.
@@ -189,14 +206,17 @@ body parts only) and `rom_scan` (moving parts only) are each blind to a class of
   wrong.** Two answers to the hip fork screws (four coaxial bores, then two 20° channels
   through the corner, eight holes) were deleted when the cradle became a bolted part and
   the screws ended up in open air. `README.md`, "Reaching the fork screws".
-- **Payload gaps get their own probe**: `gps_clear()` (`OPI_BOX`), `opi_clear()` (the
-  Pi case against the LiDAR bracket, and its rear standoffs against the deck's end), `imu_clear()`,
-  `batt_clear()`, `holder_clear()`, `module_clear()`, `panel_clear()`, `lidar_fov_clear()`,
-  `camera_clear()`. Every `!! …` line the build prints is a failure like `!! INTERFERENCE`.
+- **Payload gaps get their own probe**: `imu_clear()`, `batt_clear()`, `holder_clear()`,
+  `module_clear()`, `panel_clear()`, `camera_clear()`, and in `main()` the Pi case
+  (`opi_box()`) against `camera_mount` and its rear standoffs against the deck's end. Every `!! …` line the build prints is a failure like `!! INTERFERENCE`.
 - **OCC booleans on the shin lofts fail silently**: a tool crossing a lofted spline end cap
   returns the input unchanged, `isValid()` True, and every later boolean fails the same
-  way. Hence the cavity slab stops 0.5 mm short and the profile interpolation is monotone.
-  After any change to `shin_beam`, verify with `tools/section_check.py`, not `isValid()`.
+  way. Hence the profile interpolation is monotone, and a cavity (if `SHIN_CAV` ever
+  returns) stops its slab 0.5 mm short. After any change to `shin_beam`, verify with
+  `tools/section_check.py`, not `isValid()`.
+- **`rom_scan_all()` never sweeps the foot, or the shin against the belly.** With a 55 mm
+  shin the foot folds to within 23 mm of the thigh at 110° of knee; that figure is by
+  hand, not by scan.
 
 ## Verifying a change
 
@@ -214,7 +234,7 @@ disagree. A "cosmetic" parameter still moves the moment arms `fea.py` derives.
    **inter-layer** SF (second of the `SF xy / z` pair). A drop is a regression: fix it or
    report before/after explicitly.
 5. `.venv/bin/python export_sim.py --check` — rebuilds `out/sim/`, stands both files up in
-   MuJoCo, then on the terrain scene; renders the camera; scans one LiDAR frame;
+   MuJoCo, then on the terrain scene; renders the camera;
    cross-checks total mass against `fea.robot_mass()`. `!! it fell over`, `!! the two
    files disagree` or a jumped link mass is a model regression.
 6. Regenerate the ROS 2 description and run its regressions — the second exporter lives
@@ -227,88 +247,68 @@ disagree. A "cosmetic" parameter still moves the moment arms `fea.py` derives.
    ../3d/.venv/bin/python tools/standalone_sim.py --course
    ```
 
-   No `colcon build` needed (`--symlink-install`). `--lidar` is a diagnostic; it changes no
-   dynamics.
+   No `colcon build` needed (`--symlink-install`). Seeds: `generate_model.py
+   --terrain-seed N`, then the two terrain runs; regenerate without the flag afterwards.
 7. `rom_scan(..., step=2)` before committing to real joint limits; `export_sim.py
    --rom-step 2` re-scans.
 
-### Current baseline (2026-09-14, 2.549 kg)
+### Current baseline (2.318 kg; the no-GPU WSL2 box, MuJoCo 3.12.0)
 
 Inter-layer SF per load case. `stall` scales with `SERVO_STALL_NM` only, the three ground
 columns with `fea.robot_mass()`. Read `--orient` for `thigh_A` and `cradle_front`.
 
 | | stand4 | stand2 | land3g | stall | `--orient` |
 |---|---|---|---|---|---|
-| `hip_bracket_A` | 45.0 | 22.5 | 7.5 | 2.2 | 7.79 |
-| `thigh_A` | 17.5 | 8.8 | 2.9 | 1.1 | 2.82 |
-| `shin_A` | 57.9 | 29.0 | 9.7 | 4.5 | 12.65 |
-| `cradle_front` | 4.8 | 2.4 | 0.8 | 3.0 | **1.42** |
+| `hip_bracket_A` | 47.6 | 23.8 | 7.9 | 2.1 | 7.78 |
+| `thigh_A` | 15.4 | 7.7 | 2.6 | 1.1 | 2.81 |
+| `shin_A` | 58.0 | 29.0 | 9.7 | 4.8 | 10.35 |
+| `cradle_front` | 5.3 | 2.6 | 0.9 | 2.9 | **1.54** |
+| `chassis_bottom` | 20.9 | 10.5 | 3.5 | — | 6.73 |
 
-(`--orient` is the `<- current` row. The tie slots cost `hip_bracket_A` 7.83 → 7.79 and
-`thigh_A` 2.83 → 2.82 on the same run.)
+(`--orient` is the `<- current` row. `chassis_bottom` has no stall case and runs at a 3 mm
+mesh: `part_specs()` says why. `thigh_A`'s ground columns are lower than the upright
+robot's 17.6 / 8.8 / 2.9 because the crouch turns the ground reaction across the thigh.)
 
-**The `stall` column is the live one now, not a bound.** Under the servo firmware a joint
+**The `stall` column is the live one, not a bound.** Under the servo firmware a joint
 could not hold full duty; in MODE 2 (`robot/runtime/mode2.py`) it can, and a foot that
 grips (the siped sole) hands the servo's whole torque to the bracket where a sliding dome
-handed it μ·N. Both front `hip_bracket`s broke that way on 2026-09-17, at the 2.5 kg this
-table is computed for. Read `hip_bracket_A` 2.2 and `thigh_A` 1.1 against ~3.3 N·m cold
-at a fresh pack's 12.6 V (`SERVO_STALL_NM` is the 12 V figure), and re-run `fea.py --all`
-with that torque before the next print of either. The runtime's `duty_cap` (600 ≈ 2.3 N·m)
-is the stop-gap, not a fix for the part.
+handed it μ·N. Both front `hip_bracket`s of the original robot broke that way, and the
+part is unchanged. Read `hip_bracket_A` 2.1 and `thigh_A` 1.1 against ~3.3 N·m cold at a
+fresh pack's 12.6 V (`SERVO_STALL_NM` is the 12 V figure), and re-run `fea.py --all` with
+that torque before the first print of either. The runtime's `duty_cap` (600 ≈ 2.3 N·m) is
+the stop-gap, not a fix for the part.
 
-`export_sim.py --check`: `4 feet down, upright +1.00`, base z 187 mm, camera axis
+`export_sim.py --check`: `4 feet down, upright +1.00`, base z 148 mm, camera axis
 (+0.99 0 +0.10), ROM ±90 / ±90 / ±110 (±90 is the scan window, not a stop). Probes:
-`imu clear +1.20` (to the case's corner spacer, inside the case), `opi clear +1.15` (case front to the LiDAR
-leg bosses; rear standoff feet 1.7 mm inside the deck's end), `opi bolts` (M2.5 × 11 flat, head faces 4.8 up the bores,
-2.5 mm into the case's spacers, 4.5 mm of boss above the seats), `gps clear` knee 76.9 /
-seat 96.6, `buck clear +1.00` (under the GPS plate; +7.55 to the mast arms), `batt clear +0.60`, `clamp clear +1.43`, `head clear +0.65`,
-`cradle bolts +5.15`, `fork access: all six arms`, `panel clear` (bus and low windows
-at both ends, XT30 clear of body and servos), `node clear` (two 221-415 at
-x −57.4..−49.1, |y| 12..30.6, z −6..23.9), `lidar fov 22.0 / 26.4 / 57.0 / 14.4`
-(chassis_top / lidar_mount / gps_mount / camera_mount), `camera view: out of frame` for
-all four including the L2, `lidar ... +4 mm past the leading foot`.
+`imu clear +1.20`, `batt clear +0.60`, `clamp clear +1.43`, `head clear +0.65`,
+`cradle bolts +42.15` (to the pack), `cradle inserts` to x 111.5, `fork access: all six
+arms`, `panel clear` (bus and low windows at both ends, XT30 clear of body and servos),
+`node clear` (two 221-415 at x −104.4..−96.1), `camera bolts` (M3 × 12 flat, 2.3 mm of
+deck above the seats, 2.6 mm past the nut), `opi bolts` (M2.5 × 11 flat, 2.5 mm into the
+case's spacers), `opi clear` (rear standoff foot 48.7 mm inside the deck's end),
+`camera view: out of frame` for all three.
 
-Step 6, same seeds: **flat trot 537.3 mm** (the flat-head seats: −0.2 g off the deck) with the buck's 18 g on the case top
-(`buck_com()`, out of `ELECTRONICS_KG` — same total, the robot's CoM 0.2 mm up and 0.1
-aft; the default terrain seed reads 454 upright, the default course seed 3/7 at 2195 mm
-upright). The cased Orange Pi one pass earlier (box −85.5..19.5 ×
-70.5 × 40 over 6.5 mm standoffs, mast seat 65 → 95.7, `ELECTRONICS_KG` 195 → 250 g
-measured, the IMU inside the case) read **526.0**, terrain 445 upright, course 4/7 at
-2348 — and **0/7, down at 645 mm** one pass before that with the IMU's 3 g on the deck
-instead: the mass cliff, as the +Δm control below predicts. The
-terrain and course arms below are the previous tree's: the base link's CoM moved 11 mm
-aft and 15 mm up and 55 g heavier, which is a re-baseline, and the `--orient` column is
-unchanged (stall-driven). Previous tree: **534.7 mm** (the four cable windows, the rib and the tie
-slots: −3.5 g, nearly all off the base link; the control — the same mass out of
-`ELECTRONICS_KG` on the previous geometry — reads 536.5, the previous tree 543.8);
-**terrain seeds 7…12: 485 / 420 mm on the two upright, 4/6 down (8, 9, 10, 12)** — the
-control puts 8 and 12 down and reads 483 / 452 / 274 / 385 on the rest, the previous tree
-had 11 and 12 down. Seeds 9 and 10 fall with the windows and stand without them at the
-same mass, on a metric that is chaotic in the gram; 4/6 against 2/6 is not a
-distinction at n = 6, and the gait's own re-tune is what settles it. **Course seeds
-7/8/9: 1423 / 310 (down) / 364 (down) mm** — the control reads 2283 / 321 (down) / 1190;
-seed 8 is the mass cliff both ways. The gait is hand-tuned and due a re-tune before any
-of this is read further.
+Step 6, gait defaults (swing 12 mm, body 133 mm): **flat trot 557.1 mm**; **terrain seeds
+7…12: 548 / 530 / 464 / 387 / 444 / 543 mm, 0/6 down**; **course seeds 7/8/9: 4/7 at
+2468 mm, 0/7 at 1046 mm, 0/7 at 949 mm, all upright** — on 8 and 9 the 12 mm swing stalls
+at the first log (14 mm) instead of falling over it. `ros2/smalldog_walker` tests: 11
+passed.
 
 ### How to read step 6
 
 - **The flat trot is deterministic to 0.1 mm and is the control**: unchanged means the
-  model did not move. It is also **hypersensitive to total mass** (11 g anywhere:
-  778 → 597 mm) and flat under torque changes, so never read a distance change as a
-  geometry regression without a control beside it.
-- **Read the terrain arm over seeds 7…12 or not at all** (±70 mm across seeds, chaotic in
-  mass on one seed). Two means inside each other's spread are one distribution.
-- **The course is a report, not a pass/fail**, read over seeds 7/8/9; the unchanged tree
-  has read 5/7, 4/7 and 3/7 on the default seed.
-- **Run a +Δm control**: the same mass parked in `ELECTRONICS_KG` on the unchanged
-  geometry. 7 g of dead mass puts one terrain seed on its back and halves the course; the
-  seed-8 fall in the baseline above reproduces at 0.79 g of dead mass to two millimetres,
-  so it is the mass cliff, not the geometry. Without that column a mass change reads as
-  the part breaking the walker.
-- **Distances fell by a third twice (fitted actuator; then the gait limiting to the
-  achievable `(forcerange − frictionloss)/damping` = 3.28 rad/s instead of the vendor
-  no-load speed) and both were the model getting honest.** Do not recover them by putting
-  `MJ_DAMPING` or the old rate limit back. The hand-tuned gait is due a re-tune.
+  model did not move. A change that touches no value (re-expressing a literal) must
+  reproduce it exactly.
+- **Compare against this machine only.** The same model reads a few mm differently on the
+  mac, and MuJoCo 4.x puts it on its back on the terrain.
+- **Read the terrain arm over seeds 7…12 or not at all**; one seed spans 387…548 here.
+- **The course is a report, not a pass/fail**, read over seeds 7/8/9.
+- **Mass sensitivity is not yet measured on this body.** The short-bodied robot's trot was
+  chaotic in the gram (11 g anywhere: 778 → 597 mm; 7 g of dead mass put a terrain seed on
+  its back), so run a +Δm control — the same mass parked in `ELECTRONICS_KG` on the
+  unchanged geometry — before reading a distance change as the geometry's doing.
+- **Do not recover distance with `MJ_DAMPING` or the rate limit.** Both were made honest
+  against the measured servo (`(forcerange − frictionloss)/damping` = 3.28 rad/s).
 - When `terrain.py` changes, re-baseline by running the unchanged model on the new course
   first. Seed sweeps need one heightfield file per seed (MuJoCo caches by file name).
 
@@ -317,6 +317,6 @@ of this is read further.
 - FEA meshes in `out/fea/` are cached on the STEP content hash; stale entries are safe to
   delete.
 - `README.md` marks several dimensions **verify** (where the Orange Pi sits in its case,
-  connector bodies, GPS board, camera lens); keep the marker until measured.
+  connector bodies, camera lens); keep the marker until measured.
 - `tools/section_check.py` gives exact section moments along the shin in seconds — use it
   to converge a profile, then still run `fea.py`.

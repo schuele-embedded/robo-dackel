@@ -1,18 +1,20 @@
 # PLAN.md — what to build next, and why
 
-Three things are missing — **a battery, an IMU, and the Orange Pi is not installed** — and
-they gate different work. Steps 4–6 need nothing that is not already on the desk; 7–10
-wait on hardware. Steps 1–3 are done and their results live in the trees, not here.
+This fork is the dachshund: a 220 mm body on 75 / 55 mm legs, camera and IMU, no LiDAR and
+no GPS (`plan/README.md` has the comparison with the original). **It exists in CAD and in
+simulation only.** Nothing is bought or printed, and no policy is trained.
+
+Steps 1–5 below are the original robot's bench work. They are about the ST3215 servo, not
+about a body, so their results carry over; where one needs the assembled robot it says so.
 
 ## Where things stand
 
 | tree | state |
 |---|---|
-| `3d/` | done and verified; the ladder in `3d/CLAUDE.md` is green on the current tree |
-| `ros2/` | generated from the CAD, trots in sim, terrain and course regressions baselined |
-| `rl/` | code complete, checks green, **never trained in earnest** |
-| `slam` | `ros2/smalldog_nav` maps and explores a room in sim; `robot/slam`'s 3-D frontend is measured and scene-dependent. **Neither has met the real sensor** (`robot/README.md`, "SLAM") |
-| `robot/` | walks tethered on the bench at 2.55 kg (1 kg plate as ballast); every servo number below is measured on one unit |
+| `3d/` | dachshund geometry done; the ladder in `3d/CLAUDE.md` is green on the current tree |
+| `ros2/` | generated from the CAD; the re-tuned trot's flat, terrain and course regressions are baselined. `smalldog_nav` and the SLAM tools need a LiDAR this robot does not carry |
+| `rl/` | environment adapted, `check_model.py` 0 FAIL, **no policy for this body** |
+| `robot/` | written and measured on the original robot; `calib.json`, the contact baselines and the launch `FIT` points are that robot's and have to be re-taken |
 
 ## Done — where the result lives
 
@@ -25,23 +27,6 @@ wait on hardware. Steps 1–3 are done and their results live in the trees, not 
 | 3 fitted constants into the CAD | `MJ_KP` 40.9, `MJ_FRICTIONLOSS` 0.184, `MJ_DAMPING` 1.37, `MJ_ARMATURE` 0.0165 | `3d/mini_dog.py` section 4; `3d/CLAUDE.md` baseline |
 | 3b gait rate limit | limits against the achievable 3.15 rad/s ceiling, not the no-load speed | `ros2/README.md`, "Gait" |
 | 3c no-load speed | **3.86 rad/s**, a firmware profile cap: open loop the motor does 5.0 (`--pwm`, reading A) | `robot/README.md`, "The no-load speed" |
-
-## What each missing part gates
-
-**The battery is not just runtime.** The sim trot is hypersensitive to mass and to where it
-sits (`3d/CLAUDE.md`), so every gait number tuned with a plate is tuned against a stand-in.
-And supply voltage changes the servo: stiffness is 3.44 N·m/rad per volt, so a 3S pack
-(12.6 → 9.9 V) costs 21 % of it over a discharge. That is a gait variable and belongs in
-domain randomisation.
-
-**The IMU gates the feedback half of everything.** The walker levels the body and holds
-heading on it; in sim that took the obstacle course from 1 obstacle cleared to 5, and none
-of it has run on hardware. `rl/`'s observation includes the IMU, so no policy is deployable
-until one exists. The mount is decided (`IMU_*` in `mini_dog.py`, checked by
-`rl/checks/imu_placement.py`), just not populated.
-
-**The Pi can wait.** The 50 Hz loop already closes from the mac over CDC; what the Pi buys
-— ROS 2 on the robot, the LiDAR, the camera, the ONNX policy — is all untethered concerns.
 
 ---
 
@@ -61,8 +46,7 @@ and both sims' `forcerange`. `MJ_DAMPING` 1.37 → **0.92**: the ladder's total 
 calibration (k_t 0.596 N·m/V, before the gearbox's load loss) and the stall in the scale's
 (0.400 after it); the joint ceiling divides one by the other, so both carry the scale's
 now, and the ceiling is 3.15 → **3.28 rad/s** — speed kept, stall honest. `rl/` zeroes
-`MJ_DAMPING` and its law's own stall after `mu_load` is ~3.2 already. Ladder run, step 6:
-flat 523 (control 457), terrain 415 ±44 0/6 down, course all upright. **Open:** the held 2.3 N·m and the
+`MJ_DAMPING` and its law's own stall after `mu_load` is ~3.2 already. **Open:** the held 2.3 N·m and the
 2 s timer are a per-joint duty budget for `robot/runtime/safety.py`, not written; and a 3 kg
 scale at 12 V would confirm the 3.2 peak directly.
 
@@ -80,7 +64,9 @@ wider world than exists; nothing needs retraining for it.
 
 ## 5. Settle the traction question before touching a sole
 
-Two bench runs, no code. The sim has already been asked and cannot answer: four alternative
+Two bench runs, no code, and they need a robot on a floor (step 8). The shin angles and
+foot duties quoted below are the original robot's; re-read them off the dachshund first.
+The sim has already been asked and cannot answer: four alternative
 soles were built and measured (`ros2/README.md`, "The foot's contact patch") and none
 bought anything, because MuJoCo contact is rigid and Coulomb friction ignores area. On
 hardware the foot is a true R = 13 hemisphere with a 2.5 mm Hertz patch at 1.3 MPa, and the
@@ -106,43 +92,50 @@ so `--rough` is the arm that can. Choose a shape with coupons on a tilt plate, n
 
 ## 6. Train
 
-Everything that blocked it is resolved: the two sims agree on servo strength (3.2), the
-training path has friction at rest, `check_model.py` is 0 FAIL. The WSL2 box does this
-alone. Do not expect to deploy — that needs the IMU. Step 3b's gait re-tune is for the
-hand-tuned regression harness, not a blocker: RL learns its own gait.
+Nothing blocks it but a machine: MJX needs a CUDA GPU (`WSL.md`, `GPU.md`). From scratch —
+the action is an offset from the stand pose, which moved, so the old policy was removed
+rather than fine-tuned. `python train_ppo.py`, then `eval.py --seconds 5` against the IK
+trot (557.1 mm flat, 547.6 mm on the heightfield), then `export_onnx.py` into `rl/policy/`
+and commit it.
+
+Look at these after the first run, not before: the command ranges and `ACTION_SCALE` in
+`rl/env/walk.py` (sized for an 82 mm shin), and `rl/tools/bc_trot.py`'s gait literals.
+
+What to expect it to beat: the hand-tuned trot swings the foot 12 mm and stalls at a 14 mm
+log on two of three course seeds.
+
+**This is the gate.** A policy that walks in `replay.py` and beats the trot in `eval.py` is
+what justifies buying parts.
 
 ---
 
-## 7. When the IMU arrives
+## 7. Buy and print
 
-Mount at the `IMU_*` site, solder to the pads (headerless — `3d/ref/imu/README.md`), re-run
-`rl/checks/imu_placement.py` against the real mount, then close the walker's loop on
-hardware for the first time. Cheaper than the battery, and it unblocks both the walker's
-levelling/heading hold and the deployability of anything `rl/` produces.
+Parts list in `plan/README.md`. Before the full set: print `servo_gauge` and a
+`M3_TAP` / `M25_TAP` coupon (`3d/CLAUDE.md`, both radii are unverified), then one leg.
+Measure the knee lead's bend behind the plug on that leg — 14 mm of escape is what holds
+the thigh at 75 mm, and a real lead that needs less would let it shorten.
 
-## 8–10. When the battery arrives
+## 8. Bring-up
 
-8. **Replace the ballast with the pack** and re-measure every gait figure once, with a
-   control run beside it — `3d/CLAUDE.md`'s mass-cliff warning applies as written.
-9. **Install the Orange Pi** and move the 50 Hz loop onto it. Re-run `bus_probe.py` there
-   first: the transaction cost is a property of the machine.
-10. **LiDAR and camera** — sensors for autonomy, not walking, and both need the Pi. The
-    model side is done: measured point rate, cone read out of the compiled model by both
-    consumers. **The mapping half is done in sim**: `ros2/smalldog_nav` covers a room by
-    itself (2-D scan into slam_toolbox, gait odometry, Nav2, a frontier explorer).
+`plan/README.md` section 7. Three things are this robot's and not inherited:
 
-    **What is not done is any of it on the real sensor.** `ros2/tools/walk_map.py` measures
-    the other frontend — `robot/slam/`'s 3-D ICP — against MuJoCo truth, and the headline
-    is a caution about the sim rather than about that frontend: standing perfectly still it
-    drifts 0.09 m in `scene_room.xml`, 0.25 m in a larger room, and **0.48 m on the one
-    real capture we have**. The sim room flatters it, and `smalldog_nav` has never met the
-    real L2 either. Full table in `robot/README.md`, "SLAM".
+1. **Re-capture `robot/runtime/calib.json`.** Its own soft-limit block wins over
+   `robot_params.json`.
+2. **Weigh it, front feet and rear feet.** The CAD puts the centre of mass at the hip
+   centre; the original measured 25–40 mm ahead of its CAD. The result goes into
+   `stance_x` (`robot.launch.py`) and `com_offset_m_abs` (`rl/params/domain_rand.json`),
+   and the policy is retrained on the measured band.
+3. **Check the bus on the long leads.** The front trunk runs 47 mm further than on the
+   original, which already showed checksum errors on two rear-leg leads under torque
+   (`robot/README.md`).
 
-    So the next two are cheap and neither needs the Pi: `3d/tools/stream_pcd.cpp` forwards
-    the L2's accelerometer but **drops its gyro** and per-point `time`, which anything that
-    deskews or propagates between frames wants; and **record the L2 while the robot walks**
-    (`slam.py --record`, `--replay` to score it offline) so that there is real walking data
-    to hold either frontend against.
+Step 5's traction runs belong here too: they need the robot on a floor.
+
+## 9. If it should see
+
+The camera is on the robot and nothing uses it yet. A LiDAR would need a mount designed
+for the long deck — the old bracket's positions were tied to the 126 mm body.
 
 ---
 
