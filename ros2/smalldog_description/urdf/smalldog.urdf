@@ -76,17 +76,17 @@
   </link>
   <link name="fl_shin">
     <inertial>
-      <origin xyz="-0.000802 0.000425 -0.038502" rpy="0 0 0"/>
-      <mass value="0.04417"/>
-      <inertia ixx="0.00003359" ixy="-0.00000002" ixz="-0.00000037" iyy="0.00002890" iyz="-0.00000034" izz="0.00000984"/>
+      <origin xyz="-0.000000 0.000502 -0.029339" rpy="0 0 0"/>
+      <mass value="0.03680"/>
+      <inertia ixx="0.00001659" ixy="0.00000000" ixz="0.00000000" iyy="0.00001173" iyz="-0.00000014" izz="0.00000897"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry><mesh filename="package://smalldog_description/meshes/fl_shin.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="grey"/>
     </visual>
-    <collision><origin xyz="0.0000 0.0000 -0.0385" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0610"/></geometry></collision>
-    <collision><origin xyz="0.0000 0.0000 -0.0820" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0250" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0340"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0550" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
   </link>
   <link name="fr_hip">
     <inertial>
@@ -126,17 +126,17 @@
   </link>
   <link name="fr_shin">
     <inertial>
-      <origin xyz="-0.000802 -0.000425 -0.038502" rpy="0 0 0"/>
-      <mass value="0.04417"/>
-      <inertia ixx="0.00003359" ixy="0.00000002" ixz="-0.00000037" iyy="0.00002890" iyz="0.00000034" izz="0.00000984"/>
+      <origin xyz="-0.000000 -0.000502 -0.029339" rpy="0 0 0"/>
+      <mass value="0.03680"/>
+      <inertia ixx="0.00001659" ixy="-0.00000000" ixz="0.00000000" iyy="0.00001173" iyz="0.00000014" izz="0.00000897"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry><mesh filename="package://smalldog_description/meshes/fr_shin.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="grey"/>
     </visual>
-    <collision><origin xyz="0.0000 0.0000 -0.0385" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0610"/></geometry></collision>
-    <collision><origin xyz="0.0000 0.0000 -0.0820" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0250" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0340"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0550" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
   </link>
   <link name="rl_hip">
     <inertial>
@@ -176,17 +176,17 @@
   </link>
   <link name="rl_shin">
     <inertial>
-      <origin xyz="0.000802 0.000425 -0.038502" rpy="0 0 0"/>
-      <mass value="0.04417"/>
-      <inertia ixx="0.00003359" ixy="0.00000002" ixz="0.00000037" iyy="0.00002890" iyz="-0.00000034" izz="0.00000984"/>
+      <origin xyz="0.000000 0.000502 -0.029339" rpy="0 0 0"/>
+      <mass value="0.03680"/>
+      <inertia ixx="0.00001659" ixy="-0.00000000" ixz="-0.00000000" iyy="0.00001173" iyz="-0.00000014" izz="0.00000897"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry><mesh filename="package://smalldog_description/meshes/rl_shin.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="grey"/>
     </visual>
-    <collision><origin xyz="0.0000 0.0000 -0.0385" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0610"/></geometry></collision>
-    <collision><origin xyz="0.0000 0.0000 -0.0820" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0250" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0340"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0550" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
   </link>
   <link name="rr_hip">
     <inertial>
@@ -226,17 +226,17 @@
   </link>
   <link name="rr_shin">
     <inertial>
-      <origin xyz="0.000802 -0.000425 -0.038502" rpy="0 0 0"/>
-      <mass value="0.04417"/>
-      <inertia ixx="0.00003359" ixy="-0.00000002" ixz="0.00000037" iyy="0.00002890" iyz="0.00000034" izz="0.00000984"/>
+      <origin xyz="0.000000 -0.000502 -0.029339" rpy="0 0 0"/>
+      <mass value="0.03680"/>
+      <inertia ixx="0.00001659" ixy="0.00000000" ixz="-0.00000000" iyy="0.00001173" iyz="0.00000014" izz="0.00000897"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry><mesh filename="package://smalldog_description/meshes/rr_shin.stl" scale="0.001 0.001 0.001"/></geometry>
       <material name="grey"/>
     </visual>
-    <collision><origin xyz="0.0000 0.0000 -0.0385" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0610"/></geometry></collision>
-    <collision><origin xyz="0.0000 0.0000 -0.0820" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0250" rpy="0 0 0"/><geometry><cylinder radius="0.0120" length="0.0340"/></geometry></collision>
+    <collision><origin xyz="0.0000 0.0000 -0.0550" rpy="0 0 0"/><geometry><sphere radius="0.0130"/></geometry></collision>
   </link>
   <joint name="fl_roll" type="revolute">
     <parent link="base_link"/>

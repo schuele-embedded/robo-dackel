@@ -326,7 +326,9 @@ print("  joint limits, from the CAD ROM scan: "
       + ", ".join(f"{k} +-{v:.3f} rad ({math.degrees(v):.0f} deg)"
                   for k, v in J_LIM.items()))
 
-STANCE = {"pitch": -0.42, "knee": 1.05}                  # nominal standing angles
+# nominal standing angles - mini_dog's stand pose, read and not copied: this was a
+# literal (-0.42, 1.05) beside the CAD's own (-22, 46 deg), and the two had drifted.
+STANCE = {"pitch": math.radians(md.STAND_PITCH), "knee": math.radians(md.STAND_KNEE)}
 
 def joints_of(leg):
     """the leg's three joints; the last field is the SIGNED (lo, hi) limit pair in rad.

@@ -198,7 +198,7 @@ BODY_Z0, BODY_Z1 = -25.0, 25.0
 DECK_T           = 4.0
 ROLL_X, ROLL_Y, ROLL_Z = 137.0, 36.0, 0.0
 PITCH_X, LEG_Y, PITCH_Z = 137.0, 76.0, -30.0   # pitch axis sits below the roll fork sweep
-L_THIGH, L_SHIN  = 75.0, 82.0
+L_THIGH, L_SHIN  = 75.0, 55.0
 KNEE_Z = PITCH_Z - L_THIGH
 FOOT_Z = KNEE_Z - L_SHIN
 FOOT_D           = 26.0
@@ -252,22 +252,25 @@ FOOT_TREAD_Z0 = 3.0                   # the skin stops this far below the equato
 # the knee axis), bow = the X offset of the section centre, r = section corner radius.
 # Interpolated with a monotone cubic: monotone means the curve cannot overshoot the table,
 # which is what stops the loft spline inventing bulges the parameters never asked for.
+#
+# THE DACHSHUND SHIN IS 55 mm, and that leaves 11 mm of blade: the fork spine owns
+# u <= 31 whatever the length, and the ankle boss is at u = L_SHIN - FOOT_D/2 = 42.  So the
+# table is the fork, a shoulder and the boss, with no bow (nothing to bow over) and NO
+# CAVITY: the foot bolt's bore runs up to u = 32.6, through all of it, and a hollow that
+# short is a nut slot's worth of plastic saved.  The thigh did not shorten with it - at
+# 75 the knee servo's connector keep-out exactly clears the hip bracket's pitch sleeve,
+# and every mm less cuts that sleeve's end wall and thrust lug (488 mm3 at 72).
 SHIN_PROFILE = (
     #  u      X      Y    bow     r
     (25.0, 27.6, 42.6,  0.0,  1.5),   # buried in the fork spine, 0.2 inside it on every face
     (31.0, 27.6, 42.6,  0.0,  1.5),   # fork outer face - the boss
-    (34.0, 27.4, 37.0, -0.8,  3.5),   # shoulder: the lateral width collapses out of the fork
-    (38.0, 27.0, 28.0, -2.2,  6.5),
-    (43.0, 26.0, 22.6, -3.6,  9.0),
-    (49.0, 25.2, 20.6, -4.4,  9.4),   # blade: near-constant lateral, tapering fore-aft
-    (55.0, 23.4, 19.8, -4.2,  9.0),
-    (61.0, 21.4, 19.2, -3.0,  8.6),
-    (65.0, 20.2, 19.2, -1.6,  8.4),   # waist
-    (69.0, 20.0, 20.4,  0.0,  9.5),   # ankle boss, round, around the 18 mm foot spigot
-)
+    (34.0, 27.0, 36.0,  0.0,  4.0),   # shoulder: the lateral width collapses out of the fork
+    (38.0, 24.0, 26.0,  0.0,  7.5),
+    (L_SHIN - FOOT_D/2, 20.0, 20.4,  0.0,  9.5),   # ankle boss, round, around the 18 mm
+)                                                  # foot spigot - u = 42
 SHIN_WALL, SHIN_RIB = 3.2, 2.6                # wall, and the central shear web
-SHIN_CAV   = (36.0, 62.0)                     # cavity: closed by a bulkhead at either end
-SHIN_TIE_U = (45.0, 51.0)                     # one tie anchor: in one slot, out the other
+SHIN_CAV   = None                             # (u0, u1) of a cavity, or None: solid
+SHIN_TIE_U = ()                               # tie anchors into the cavity's near cell
 # THE BATTERY IS A MODULE, NOT SIX CELLS IN THE CHASSIS.
 #
 # It used to be a cradle: four printed fins on the cell pitch, two end stops, a strap, and
@@ -894,7 +897,7 @@ CAM_CAP      = 1.2                    # roof over the board pocket at the near e
                                       # 0.4 mm perimeters, and it carries nothing but a
                                       # 4 g board that must not lift out of its slot
 
-STAND_PITCH, STAND_KNEE = -22.0, 46.0
+STAND_PITCH, STAND_KNEE = -30.0, 73.0
 
 # =====================================================================================
 # 4. mass / drive - the single source for fea.py, export_sim.py, the BOM AND the ROS 2
@@ -2277,8 +2280,10 @@ def shin_beam():
     wall, split down the middle by a shear web.  The web also halves the roof span the
     slicer has to bridge - the part prints lying on its side."""
     u0, u1 = SHIN_PROFILE[0][0], SHIN_PROFILE[-1][0]
-    c0, c1 = SHIN_CAV
     s = loft([shin_wire(u) for u in shin_stations(u0, u1)])
+    if SHIN_CAV is None:
+        return s
+    c0, c1 = SHIN_CAV
     cav = loft([shin_wire(u, SHIN_WALL) for u in shin_stations(c0, c1)])
     # The web is what is left standing when a slab is taken out of the cavity.  That slab
     # stops 0.5 mm short of the cavity's end caps on purpose: a tool that crosses those
